@@ -1,7 +1,7 @@
-// Still has some issues, regular doesnt find regularly until 'regularl' is searched
-
 gmls_init();
 gmui_init();
+
+gmls_set_config(false, false, 4);
 
 search_text = "";
 search_results = [ ];
