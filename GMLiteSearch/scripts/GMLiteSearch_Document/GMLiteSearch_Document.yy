@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"GMLiteSearch_Document",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"GMLiteSearch_Document",
+  "parent":{
+    "name":"Features",
+    "path":"folders/GMLiteSearch/Features.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

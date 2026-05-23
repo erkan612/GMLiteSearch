@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"GMLiteSearch_Stemming",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"GMLiteSearch_Stemming",
+  "parent":{
+    "name":"Features",
+    "path":"folders/GMLiteSearch/Features.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"GMLiteSearch_Developer",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"GMLiteSearch_Developer",
+  "parent":{
+    "name":"GMLiteSearch",
+    "path":"folders/GMLiteSearch.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
