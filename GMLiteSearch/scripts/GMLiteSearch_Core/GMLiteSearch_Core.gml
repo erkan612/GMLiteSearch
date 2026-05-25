@@ -147,6 +147,7 @@ function gmls_cleanup() {
     if (variable_struct_exists(_ls, "facet_cache")) ds_map_destroy(_ls.facet_cache);
     if (variable_struct_exists(_ls, "active_filters")) ds_map_destroy(_ls.active_filters);
     if (variable_struct_exists(_ls, "range_facets")) ds_map_destroy(_ls.range_facets);
+	if (variable_struct_exists(_ls, "date_facets")) ds_map_destroy(_ls.date_facets);
     
     // Geo
     if (variable_struct_exists(_ls, "geo_index")) ds_map_destroy(_ls.geo_index);

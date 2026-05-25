@@ -1,48 +1,58 @@
 gmui_init();
 gmls_init();
 
-// STEP 1: ADD DOCUMENTS WITH FACETS, GEOLOCATION, AND GAME COORDINATES
+// STEP 1: ADD DOCUMENTS WITH FACETS, GEOLOCATION, GAME COORDINATES, AND DATES
+
+var _base_date = date_create_datetime(2024, 1, 1, 0, 0, 0);
 
 var _games = [
     { id: "game1", name: "Dragon Fantasy", 
       text: "Epic fantasy RPG with dragons, magic spells, and huge open world.",
       category: "rpg", tags: ["fantasy", "dragons", "magic"], platform: "pc", price: 59.99, year: 2024,
-      lat: 40.7128, lng: -74.0060, game_x: 150, game_y: 200, game_z: 0, popularity: 95 },
+      lat: 40.7128, lng: -74.0060, game_x: 150, game_y: 200, game_z: 0, popularity: 95,
+      release_date: date_inc_day(_base_date, 15) },
       
     { id: "game2", name: "Cyber Shooter", 
       text: "Fast-paced multiplayer FPS with futuristic weapons and cyberpunk aesthetic.",
       category: "action", tags: ["shooter", "multiplayer", "cyberpunk"], platform: "pc", price: 49.99, year: 2023,
-      lat: 40.7135, lng: -74.0070, game_x: 500, game_y: 300, game_z: 5, popularity: 88 },
+      lat: 40.7135, lng: -74.0070, game_x: 500, game_y: 300, game_z: 5, popularity: 88,
+      release_date: date_inc_day(_base_date, 45) },
       
     { id: "game3", name: "Mystery Mansion", 
       text: "Adventure puzzle game set in haunted mansion. Solve mysteries.",
       category: "adventure", tags: ["puzzle", "mystery", "horror"], platform: "console", price: 39.99, year: 2024,
-      lat: 40.7140, lng: -74.0080, game_x: 300, game_y: 400, game_z: 2, popularity: 72 },
+      lat: 40.7140, lng: -74.0080, game_x: 300, game_y: 400, game_z: 2, popularity: 72,
+      release_date: date_inc_day(_base_date, 90) },
       
     { id: "game4", name: "Strategy Legends", 
       text: "Deep turn-based strategy game with resource management.",
       category: "strategy", tags: ["turn-based", "management"], platform: "pc", price: 44.99, year: 2022,
-      lat: 40.7150, lng: -74.0090, game_x: 700, game_y: 500, game_z: 10, popularity: 68 },
+      lat: 40.7150, lng: -74.0090, game_x: 700, game_y: 500, game_z: 10, popularity: 68,
+      release_date: date_inc_day(_base_date, 120) },
       
     { id: "game5", name: "Magic Cards", 
       text: "Fantasy card game with magic spells and mythical creatures.",
       category: "card", tags: ["fantasy", "cards", "multiplayer"], platform: "mobile", price: 9.99, year: 2024,
-      lat: 40.7160, lng: -74.0100, game_x: 250, game_y: 180, game_z: 0, popularity: 91 },
+      lat: 40.7160, lng: -74.0100, game_x: 250, game_y: 180, game_z: 0, popularity: 91,
+      release_date: date_inc_day(_base_date, 200) },
       
     { id: "game6", name: "Space Explorer", 
       text: "Open world space exploration game. Discover planets.",
       category: "adventure", tags: ["space", "exploration"], platform: "pc", price: 59.99, year: 2024,
-      lat: 40.7110, lng: -74.0040, game_x: 600, game_y: 350, game_z: 8, popularity: 85 },
+      lat: 40.7110, lng: -74.0040, game_x: 600, game_y: 350, game_z: 8, popularity: 85,
+      release_date: date_inc_day(_base_date, 250) },
       
     { id: "game7", name: "Physics Platformer", 
       text: "Challenging platformer with realistic physics puzzles.",
       category: "action", tags: ["platformer", "physics"], platform: "switch", price: 29.99, year: 2023,
-      lat: 40.7120, lng: -74.0050, game_x: 400, game_y: 250, game_z: 3, popularity: 79 },
+      lat: 40.7120, lng: -74.0050, game_x: 400, game_y: 250, game_z: 3, popularity: 79,
+      release_date: date_inc_day(_base_date, 300) },
       
     { id: "game8", name: "RPG Dungeons", 
       text: "Classic dungeon crawler RPG with character customization.",
       category: "rpg", tags: ["dungeon", "loot", "fantasy"], platform: "pc", price: 34.99, year: 2023,
-      lat: 40.7130, lng: -74.0065, game_x: 200, game_y: 220, game_z: 1, popularity: 82 }
+      lat: 40.7130, lng: -74.0065, game_x: 200, game_y: 220, game_z: 1, popularity: 82,
+      release_date: date_inc_day(_base_date, 350) }
 ];
 
 for (var i = 0; i < array_length(_games); i++) {
@@ -61,6 +71,7 @@ for (var i = 0; i < array_length(_games); i++) {
     gmls_add_location_2d(_g.id, _g.game_x, _g.game_y);
     gmls_add_location_3d(_g.id, _g.game_x, _g.game_y, _g.game_z);
     gmls_add_location_grid(_g.id, _g.game_x, _g.game_y, 200);
+    gmls_add_date_facet(_g.id, "release_date", _g.release_date);
     
     for (var c = 0; c < _g.popularity / 10; c++) {
         gmls_add_training_example(_g.name, _g.id, _g.popularity / 100);
@@ -75,7 +86,7 @@ show_debug_message("============================================================
 show_debug_message("GMLITESEARCH - COMPLETE DEMONSTRATION");
 show_debug_message("============================================================");
 show_debug_message("");
-show_debug_message("[SETUP] Added " + string(array_length(_games)) + " documents with facets, geolocation, and game coordinates");
+show_debug_message("[SETUP] Added " + string(array_length(_games)) + " documents with facets, geolocation, game coordinates, and date facets");
 show_debug_message("[SETUP] Added " + string(ds_list_size(global.gmls.ltr_training_data)) + " LTR training examples");
 show_debug_message("");
 
@@ -118,10 +129,36 @@ for (var i = 0; i < array_length(_faceted_results.results); i++) {
 gmls_clear_facet_filters();
 show_debug_message("");
 
-// STEP 4: GEOSPATIAL SEARCH (Real World Coordinates)
+// STEP 4: DATE FACET SEARCH
 
 show_debug_message("------------------------------------------------------------");
-show_debug_message("3. GEOSPATIAL SEARCH (Real World - Lat/Lng)");
+show_debug_message("3. DATE FACET SEARCH");
+show_debug_message("------------------------------------------------------------");
+
+show_debug_message("Date histogram for 'release_date' (by month):");
+var _date_histogram = gmls_get_date_histogram("release_date", "month", 12, "", undefined);
+var _month_keys = variable_struct_get_names(_date_histogram);
+for (var i = 0; i < array_length(_month_keys); i++) {
+    var _key = _month_keys[i];
+    show_debug_message("  " + _key + ": " + string(_date_histogram[$ _key]) + " games");
+}
+
+show_debug_message("");
+show_debug_message("Filter by last 30 days:");
+gmls_add_date_filter("release_date", "last_30_days");
+var _date_filtered = gmls_search_faceted("", -1, ["category"]);
+show_debug_message("  Games released in last 30 days: " + string(_date_filtered.total));
+for (var i = 0; i < array_length(_date_filtered.results); i++) {
+    show_debug_message("  - " + _date_filtered.results[i].document.metadata.title);
+}
+
+gmls_clear_facet_filters();
+show_debug_message("");
+
+// STEP 5: GEOSPATIAL SEARCH (Real World - Lat/Lng)
+
+show_debug_message("------------------------------------------------------------");
+show_debug_message("4. GEOSPATIAL SEARCH (Real World - Lat/Lng)");
 show_debug_message("------------------------------------------------------------");
 
 var _user_location = { lat: 40.7130, lng: -74.0065 };
@@ -134,10 +171,10 @@ for (var i = 0; i < array_length(_nearby); i++) {
 }
 show_debug_message("");
 
-// STEP 5: GAME COORDINATES SEARCH (2D)
+// STEP 6: GAME COORDINATES SEARCH (2D)
 
 show_debug_message("------------------------------------------------------------");
-show_debug_message("4. GAME COORDINATES SEARCH (2D)");
+show_debug_message("5. GAME COORDINATES SEARCH (2D)");
 show_debug_message("------------------------------------------------------------");
 
 var _player_2d = { x: 200, y: 210 };
@@ -147,29 +184,6 @@ var _nearby_2d = gmls_search_nearby_2d(_player_2d.x, _player_2d.y, 100, "", 5);
 show_debug_message("Objects within 100 units:");
 for (var i = 0; i < array_length(_nearby_2d); i++) {
     show_debug_message("  " + string(i+1) + ". " + _nearby_2d[i].document.metadata.title + " (distance: " + string(_nearby_2d[i].distance) + " units)");
-}
-
-var _nearby_2d_filtered = gmls_search_nearby_2d(_player_2d.x, _player_2d.y, 150, "fantasy", 5);
-show_debug_message("");
-show_debug_message("Objects within 150 units matching 'fantasy':");
-for (var i = 0; i < array_length(_nearby_2d_filtered); i++) {
-    show_debug_message("  " + string(i+1) + ". " + _nearby_2d_filtered[i].document.metadata.title + " (distance: " + string(_nearby_2d_filtered[i].distance) + ")");
-}
-show_debug_message("");
-
-// STEP 6: GAME COORDINATES SEARCH (3D)
-
-show_debug_message("------------------------------------------------------------");
-show_debug_message("5. GAME COORDINATES SEARCH (3D)");
-show_debug_message("------------------------------------------------------------");
-
-var _player_3d = { x: 300, y: 400, z: 2 };
-show_debug_message("Player position: (" + string(_player_3d.x) + ", " + string(_player_3d.y) + ", " + string(_player_3d.z) + ")");
-
-var _nearby_3d = gmls_search_nearby_3d(_player_3d.x, _player_3d.y, _player_3d.z, 150, "", 5);
-show_debug_message("Objects within 150 units (3D):");
-for (var i = 0; i < array_length(_nearby_3d); i++) {
-    show_debug_message("  " + string(i+1) + ". " + _nearby_3d[i].document.metadata.title + " (distance: " + string(_nearby_3d[i].distance) + ")");
 }
 show_debug_message("");
 
@@ -198,7 +212,10 @@ show_debug_message("------------------------------------------------------------
 
 show_debug_message("Training LTR model on " + string(ds_list_size(global.gmls.ltr_training_data)) + " examples...");
 gmls_enable_ltr(true);
-gmls_train_linear_model(30, 0.005);
+var _train_log = gmls_train_linear_model(30, 0.005);
+for (var i = 0; i < array_length(_train_log); i++) {
+    show_debug_message("  " + _train_log[i]);
+}
 
 var _stats = gmls_get_ltr_stats();
 show_debug_message("");
@@ -231,15 +248,82 @@ for (var i = 0; i < array_length(_snippet_results); i++) {
 }
 show_debug_message("");
 
-// STEP 10: FINAL STATISTICS
+// STEP 10: QUERY UNDERSTANDING
 
 show_debug_message("------------------------------------------------------------");
-show_debug_message("9. FINAL STATISTICS");
+show_debug_message("9. QUERY UNDERSTANDING");
+show_debug_message("------------------------------------------------------------");
+
+gmls_log_query("fantasy rpg", 3, 0);
+gmls_log_query("action games", 2, 1);
+gmls_log_query("magic cards", 1, 0);
+gmls_log_query("space exploration", 1, 0);
+gmls_log_query("fantasy games", 2, 0);
+
+gmls_record_click_with_query("fantasy rpg", "game1");
+gmls_record_click_with_query("fantasy rpg", "game5");
+gmls_record_click_with_query("action games", "game2");
+
+show_debug_message("Auto-complete suggestions for 'fan':");
+var _suggestions = gmls_get_suggestions("fan", 5);
+for (var i = 0; i < array_length(_suggestions); i++) {
+    show_debug_message("  - " + _suggestions[i]);
+}
+
+show_debug_message("");
+show_debug_message("Spell checking:");
+var _checks = ["fantacy", "magik", "dragonz"];
+for (var i = 0; i < array_length(_checks); i++) {
+    var _corrected = gmls_spell_check(_checks[i]);
+    show_debug_message("  '" + _checks[i] + "' -> '" + _corrected + "'");
+}
+
+show_debug_message("");
+show_debug_message("Search with understanding:");
+var _smart_search = gmls_search_with_understanding("fantacy rpg", 3);
+show_debug_message("  Original: " + _smart_search.original_query);
+show_debug_message("  Corrected: " + _smart_search.corrected_query);
+show_debug_message("  Results: " + string(_smart_search.result_count));
+show_debug_message("  Suggestions: " + string(_smart_search.suggestions));
+show_debug_message("");
+
+// STEP 11: HYBRID SEARCH (All Features Combined)
+
+show_debug_message("------------------------------------------------------------");
+show_debug_message("10. HYBRID SEARCH (All Features Combined)");
+show_debug_message("------------------------------------------------------------");
+
+gmls_clear_facet_filters();
+gmls_add_facet_filter("category", "rpg");
+gmls_add_date_filter("release_date", "last_30_days");
+gmls_enable_ltr(true);
+
+show_debug_message("Filters: category='rpg', release_date='last_30_days'");
+show_debug_message("Location: near user (0.3km radius)");
+show_debug_message("Query: 'fantasy'");
+show_debug_message("LTR: enabled");
+show_debug_message("");
+
+var _hybrid = gmls_search_nearby(_user_location.lat, _user_location.lng, 0.3, "km", "fantasy", 5);
+
+for (var i = 0; i < array_length(_hybrid); i++) {
+    var _snippet = gmls_generate_advanced_snippet(_hybrid[i].id, "fantasy", { default_length: 100 });
+    show_debug_message("  " + string(i+1) + ". " + _hybrid[i].document.metadata.title);
+    show_debug_message("     Distance: " + string(_hybrid[i].distance) + "km | Score: " + string(_hybrid[i].score));
+    show_debug_message("     " + _snippet);
+}
+
+// STEP 12: FINAL STATISTICS
+
+show_debug_message("");
+show_debug_message("------------------------------------------------------------");
+show_debug_message("11. FINAL STATISTICS");
 show_debug_message("------------------------------------------------------------");
 
 var _main_stats = gmls_get_stats();
 var _geo_stats = gmls_get_geo_stats();
 var _ltr_stats = gmls_get_ltr_stats();
+var _qstats = gmls_get_query_stats();
 
 show_debug_message("[DOCUMENTS] " + string(_main_stats.document_count));
 show_debug_message("[UNIQUE WORDS] " + string(_main_stats.unique_words));
@@ -247,6 +331,9 @@ show_debug_message("[FACETS INDEXED] " + string(ds_map_size(global.gmls.facet_in
 show_debug_message("[GEOTAGGED LOCATIONS] " + string(_geo_stats.total_locations));
 show_debug_message("[LTR EXAMPLES] " + string(_ltr_stats.training_examples));
 show_debug_message("[SNIPPET STRATEGY] " + global.gmls.snippet_config.strategy);
+show_debug_message("[QUERIES LOGGED] " + string(_qstats.total_queries));
+show_debug_message("[UNIQUE QUERIES] " + string(_qstats.unique_queries));
+show_debug_message("[DICTIONARY SIZE] " + string(_qstats.dictionary_size));
 
 show_debug_message("");
 show_debug_message("============================================================");

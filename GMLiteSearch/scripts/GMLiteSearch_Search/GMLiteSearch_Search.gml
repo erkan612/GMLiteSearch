@@ -276,36 +276,110 @@ function gmls_search_ngrams(_query, _max_results = -1) {
     return _results;
 }
 
-function gmls_search_faceted(_query, _max_results = -1, _return_facets = undefined) {
+//function gmls_search_faceted(_query, _max_results = -1, _return_facets = undefined) {
+//    var _ls = global.gmls;
+    
+//    var _search_results = gmls_search(_query, -1);
+    
+//    var _doc_ids = [];
+//    for (var i = 0; i < array_length(_search_results); i++) {
+//        array_push(_doc_ids, _search_results[i].id);
+//    }
+    
+//    var _filtered_ids = _gmls_apply_facet_filters(_doc_ids);
+    
+//    var _filtered_results = [];
+//    var _id_to_result = ds_map_create();
+    
+//    for (var i = 0; i < array_length(_search_results); i++) {
+//        var _res = _search_results[i];
+//        ds_map_add(_id_to_result, _res.id, _res);
+//    }
+    
+//    for (var i = 0; i < array_length(_filtered_ids); i++) {
+//        var _id = _filtered_ids[i];
+//        if (ds_map_exists(_id_to_result, _id)) {
+//            array_push(_filtered_results, ds_map_find_value(_id_to_result, _id));
+//        }
+//    }
+    
+//    ds_map_destroy(_id_to_result);
+    
+//    array_sort(_filtered_results, function(a,b) { return b.score - a.score; });
+    
+//    if (_max_results > 0 && array_length(_filtered_results) > _max_results) {
+//        array_resize(_filtered_results, _max_results);
+//    }
+    
+//    var _facet_counts = {};
+//    if (!is_undefined(_return_facets)) {
+//        _facet_counts = gmls_get_facet_counts(_query, undefined, _return_facets);
+//    } else if (array_length(_return_facets) > 0) {
+//        _facet_counts = gmls_get_facet_counts(_query, undefined, _return_facets);
+//    }
+    
+//    return {
+//        results: _filtered_results,
+//        facets: _facet_counts,
+//        total: array_length(_filtered_ids),
+//        filtered_from: array_length(_search_results)
+//    };
+//}
+
+function gmls_search_faceted(_query, _max_results = -1, _return_facets = undefined) { // this should work for empty query inputs
     var _ls = global.gmls;
     
-    var _search_results = gmls_search(_query, -1);
-    
     var _doc_ids = [];
-    for (var i = 0; i < array_length(_search_results); i++) {
-        array_push(_doc_ids, _search_results[i].id);
+    
+    if (string_length(_query) > 0) {
+        var _search_results = gmls_search(_query, -1);
+        for (var i = 0; i < array_length(_search_results); i++) {
+            array_push(_doc_ids, _search_results[i].id);
+        }
+    } else {
+        var _doc_id = ds_map_find_first(_ls.documents);
+        while (!is_undefined(_doc_id)) {
+            array_push(_doc_ids, _doc_id);
+            _doc_id = ds_map_find_next(_ls.documents, _doc_id);
+        }
     }
     
     var _filtered_ids = _gmls_apply_facet_filters(_doc_ids);
     
     var _filtered_results = [];
-    var _id_to_result = ds_map_create();
-    
-    for (var i = 0; i < array_length(_search_results); i++) {
-        var _res = _search_results[i];
-        ds_map_add(_id_to_result, _res.id, _res);
-    }
-    
     for (var i = 0; i < array_length(_filtered_ids); i++) {
         var _id = _filtered_ids[i];
-        if (ds_map_exists(_id_to_result, _id)) {
-            array_push(_filtered_results, ds_map_find_value(_id_to_result, _id));
+        var _doc = ds_map_find_value(_ls.documents, _id);
+        
+        var _score = 1.0;
+        var _matched_terms = [];
+        var _snippet = "";
+        
+        if (string_length(_query) > 0) {
+            var _search_results = gmls_search(_query, -1);
+            for (var j = 0; j < array_length(_search_results); j++) {
+                if (_search_results[j].id == _id) {
+                    _score = _search_results[j].score;
+                    _matched_terms = _search_results[j].matched_terms;
+                    _snippet = _search_results[j].snippet;
+                    break;
+                }
+            }
+        } else {
+            _snippet = string_copy(_doc.text, 1, 200);
+            if (string_length(_doc.text) > 200) _snippet += "...";
         }
+        
+        array_push(_filtered_results, {
+            id: _id,
+            score: _score,
+            document: _doc,
+            matched_terms: _matched_terms,
+            snippet: _snippet
+        });
     }
     
-    ds_map_destroy(_id_to_result);
-    
-    array_sort(_filtered_results, function(a,b) { return b.score - a.score; });
+    array_sort(_filtered_results, function(a, b) { return b.score - a.score; });
     
     if (_max_results > 0 && array_length(_filtered_results) > _max_results) {
         array_resize(_filtered_results, _max_results);
@@ -314,15 +388,13 @@ function gmls_search_faceted(_query, _max_results = -1, _return_facets = undefin
     var _facet_counts = {};
     if (!is_undefined(_return_facets)) {
         _facet_counts = gmls_get_facet_counts(_query, undefined, _return_facets);
-    } else if (array_length(_return_facets) > 0) {
-        _facet_counts = gmls_get_facet_counts(_query, undefined, _return_facets);
     }
     
     return {
         results: _filtered_results,
         facets: _facet_counts,
         total: array_length(_filtered_ids),
-        filtered_from: array_length(_search_results)
+        filtered_from: array_length(_doc_ids)
     };
 }
 
