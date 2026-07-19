@@ -51,7 +51,7 @@ function gmls_set_ltr_model(_model) {
         global.gmls.ltr_model = _model;
         return true;
     }
-    show_debug_message("GMLiteSearch: unknown LTR model '" + string(_model) + "' — model unchanged.");
+	show_debug_message("Unknown LTR model '" + string(_model) + "' - model unchanged.");
     return false;
 }
 
@@ -147,10 +147,11 @@ function _gmls_extract_features(_doc_id, _query, _search_result) {
                 if (is_real(_custom_value)) {
                     _features[$ _extractor_name] = _custom_value;
                 } else {
-                    show_debug_message("GMLiteSearch: feature extractor '" + _extractor_name + "' returned non-numeric value, skipped.");
+                    show_debug_message("LTR: feature extractor '" + _extractor_name + "' returned non-numeric value, skipped.");
                 }
             } catch (_err) {
-                show_debug_message("GMLiteSearch: feature extractor '" + _extractor_name + "' threw an error, skipped.");
+                show_debug_message("LTR: feature extractor '" + _extractor_name + "' threw an error, skipped.");
+				show_debug_message("{"+ _err.message + "}");
             }
             
             _extractor_name = ds_map_find_next(_ls.ltr_feature_extractors, _extractor_name);
