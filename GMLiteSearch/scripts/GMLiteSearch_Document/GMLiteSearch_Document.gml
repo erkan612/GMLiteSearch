@@ -85,6 +85,7 @@ function gmls_remove_document(_id) {
     var _ls = global.gmls;
     if (!ds_map_exists(_ls.documents, _id)) return false;
     
+    var _words_to_delete = [];
     var _word = ds_map_find_first(_ls.inverted_index);
     while (!is_undefined(_word)) {
         var _docs = ds_map_find_value(_ls.inverted_index, _word);
@@ -95,24 +96,33 @@ function gmls_remove_document(_id) {
             _stats.total_frequency -= _freq;
             _stats.document_frequency--;
             if (_stats.document_frequency <= 0) {
-                ds_map_delete(_ls.inverted_index, _word);
-                ds_map_delete(_ls.word_stats, _word);
+                array_push(_words_to_delete, _word);
             }
         }
         _word = ds_map_find_next(_ls.inverted_index, _word);
     }
     
+    for (var i = 0; i < array_length(_words_to_delete); i++) {
+        var _w = _words_to_delete[i];
+        ds_map_delete(_ls.inverted_index, _w);
+        ds_map_delete(_ls.word_stats, _w);
+    }
+    
     if (_ls.enable_ngrams) {
+        var _ngrams_to_delete = [];
         var _ng = ds_map_find_first(_ls.ngram_index);
         while (!is_undefined(_ng)) {
             var _docs = ds_map_find_value(_ls.ngram_index, _ng);
             if (ds_map_exists(_docs, _id)) {
                 ds_map_delete(_docs, _id);
                 if (ds_map_size(_docs) == 0) {
-                    ds_map_delete(_ls.ngram_index, _ng);
+                    array_push(_ngrams_to_delete, _ng);
                 }
             }
             _ng = ds_map_find_next(_ls.ngram_index, _ng);
+        }
+        for (var i = 0; i < array_length(_ngrams_to_delete); i++) {
+            ds_map_delete(_ls.ngram_index, _ngrams_to_delete[i]);
         }
     }
     

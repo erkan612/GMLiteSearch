@@ -1,4 +1,4 @@
-gmui_update();
+//gmui_update();
 
 /*
 if (gmui_begin("Search Window", 0, 0, surface_get_width(application_surface), surface_get_height(application_surface), gmui_window_flags.NO_TITLE_BAR | gmui_window_flags.NO_RESIZE)) {

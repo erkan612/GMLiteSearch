@@ -616,7 +616,7 @@ function gmls_search_ltr(_query, _max_results = -1) {
     
     for (var i = 0; i < array_length(_base_results); i++) {
         var _features = _gmls_extract_features(_base_results[i].id, _query, _base_results[i]);
-        var _ltr_score = _gmls_linear_rank_score(_features);
+        var _ltr_score = _gmls_rank_score(_features);
         _base_results[i].ltr_score = _ltr_score;
         _base_results[i].original_score = _base_results[i].score;
         _base_results[i].score = _ltr_score;
@@ -626,7 +626,7 @@ function gmls_search_ltr(_query, _max_results = -1) {
         }
     }
     
-    array_sort(_base_results, function(a, b) { return b.score - a.score; });
+    array_sort(_base_results, function(a, b) { return sign(b.score - a.score); });
     
     if (_max_results > 0 && array_length(_base_results) > _max_results) {
         array_resize(_base_results, _max_results);

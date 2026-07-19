@@ -1,4 +1,4 @@
-gmui_init();
+//gmui_init();
 gmls_init();
 
 // STEP 1: ADD DOCUMENTS WITH FACETS, GEOLOCATION, GAME COORDINATES, AND DATES
@@ -72,14 +72,54 @@ for (var i = 0; i < array_length(_games); i++) {
     gmls_add_location_3d(_g.id, _g.game_x, _g.game_y, _g.game_z);
     gmls_add_location_grid(_g.id, _g.game_x, _g.game_y, 200);
     gmls_add_date_facet(_g.id, "release_date", _g.release_date);
+}
+
+var _category_groups = ds_map_create();
+var _tag_groups = ds_map_create();
+
+for (var gi = 0; gi < array_length(_games); gi++) {
+    var _g = _games[gi];
     
-    for (var c = 0; c < _g.popularity / 10; c++) {
-        gmls_add_training_example(_g.name, _g.id, _g.popularity / 100);
-        gmls_add_training_example(_g.category, _g.id, _g.popularity / 100);
-        for (var t = 0; t < array_length(_g.tags); t++) {
-            gmls_add_training_example(_g.tags[t], _g.id, _g.popularity / 100);
-        }
+    if (!ds_map_exists(_category_groups, _g.category)) {
+        ds_map_add(_category_groups, _g.category, []);
     }
+    var _cat_list = ds_map_find_value(_category_groups, _g.category);
+    array_push(_cat_list, _g);
+    ds_map_set(_category_groups, _g.category, _cat_list);
+    
+    for (var t = 0; t < array_length(_g.tags); t++) {
+        var _tag = _g.tags[t];
+        if (!ds_map_exists(_tag_groups, _tag)) {
+            ds_map_add(_tag_groups, _tag, []);
+        }
+        var _tag_list = ds_map_find_value(_tag_groups, _tag);
+        array_push(_tag_list, _g);
+        ds_map_set(_tag_groups, _tag, _tag_list);
+    }
+}
+
+var _all_group_maps = [_category_groups, _tag_groups];
+for (var gm = 0; gm < array_length(_all_group_maps); gm++) {
+    var _map = _all_group_maps[gm];
+    var _key = ds_map_find_first(_map);
+    while (!is_undefined(_key)) {
+        var _group_games = ds_map_find_value(_map, _key);
+        
+        if (array_length(_group_games) >= 2) {
+            var _sorted_group = variable_clone(_group_games);
+            array_sort(_sorted_group, function(_a, _b) { return sign(_b.popularity - _a.popularity); });
+            
+            var _group_size = array_length(_sorted_group);
+            for (var gi2 = 0; gi2 < _group_size; gi2++) {
+                var _gg = _sorted_group[gi2];
+                var _relevance = max(0, min(3, _group_size - 1 - gi2));
+                gmls_add_training_example(_key, _gg.id, _relevance);
+            }
+        }
+        
+        _key = ds_map_find_next(_map, _key);
+    }
+    ds_map_destroy(_map);
 }
 
 show_debug_message("============================================================");
@@ -227,6 +267,106 @@ for (var i = 0; i < array_length(_weight_names); i++) {
 }
 show_debug_message("");
 
+// STEP 8B: LEARNING-TO-RANK - RANKNET
+
+show_debug_message("------------------------------------------------------------");
+show_debug_message("7B. LEARNING-TO-RANK - RANKNET");
+show_debug_message("------------------------------------------------------------");
+
+gmls_set_ltr_model("ranknet");
+show_debug_message("Training RankNet model on " + string(ds_list_size(global.gmls.ltr_training_data)) + " examples...");
+var _ranknet_log = gmls_train_ranknet_model(100, 0.01);
+for (var i = 0; i < array_length(_ranknet_log); i++) {
+    show_debug_message("  " + _ranknet_log[i]);
+}
+
+var _ranknet_eval = gmls_evaluate_ranknet_model();
+show_debug_message("");
+show_debug_message("RankNet evaluation:");
+show_debug_message("  Pairs tested: " + string(_ranknet_eval.pairs_tested));
+show_debug_message("  Accuracy: " + string(_ranknet_eval.accuracy));
+show_debug_message("");
+
+// STEP 8C: LEARNING-TO-RANK - LAMBDAMART
+
+show_debug_message("------------------------------------------------------------");
+show_debug_message("7C. LEARNING-TO-RANK - LAMBDAMART");
+show_debug_message("------------------------------------------------------------");
+
+var _lambdamart_samples = [];
+var _ltr_feature_names = variable_struct_get_names(_stats.feature_weights);
+var _training_size = ds_list_size(global.gmls.ltr_training_data);
+for (var i = 0; i < _training_size; i++) {
+    var _example = ds_list_find_value(global.gmls.ltr_training_data, i);
+    array_push(_lambdamart_samples, {
+        features: _example.features,
+        target: _example.relevance,
+        query: _example.query,
+        doc_id: _example.doc_id
+    });
+}
+
+show_debug_message("Training LambdaMART on " + string(array_length(_lambdamart_samples)) + " samples...");
+var _lambdamart_result = gmls_train_lambdamart_model(_lambdamart_samples, _ltr_feature_names, 25, 0.15, 3, 2);
+for (var i = 0; i < array_length(_lambdamart_result.log); i++) {
+    show_debug_message("  " + _lambdamart_result.log[i]);
+}
+
+gmls_set_ltr_ensemble(_lambdamart_result.ensemble);
+gmls_set_ltr_model("lambdamart");
+show_debug_message("");
+show_debug_message("LambdaMART ensemble trained: " + string(array_length(_lambdamart_result.ensemble.trees)) + " trees");
+
+var _lambdamart_json = gmls_save_lambdamart_model();
+show_debug_message("Saved LambdaMART model: " + string(string_length(_lambdamart_json)) + " chars");
+show_debug_message("");
+
+// STEP 8D: CUSTOM FEATURE EXTRACTOR
+
+show_debug_message("------------------------------------------------------------");
+show_debug_message("7D. LTR CUSTOM FEATURE EXTRACTOR");
+show_debug_message("------------------------------------------------------------");
+
+var _title_length_extractor = function(_doc_id, _query, _search_result) {
+    var _ls = global.gmls;
+    var _doc = ds_map_find_value(_ls.documents, _doc_id);
+    if (is_undefined(_doc) || is_undefined(_doc.metadata) || !variable_struct_exists(_doc.metadata, "title")) {
+        return 0;
+    }
+    var _title_len = string_length(_doc.metadata.title);
+    return max(0, 1 - (_title_len / 100));
+};
+gmls_register_feature_extractor("title_length_penalty", _title_length_extractor);
+
+var _sample_search_result = { id: "game1", score: 1.0 };
+var _extracted = _gmls_extract_features("game1", "fantasy rpg", _sample_search_result);
+show_debug_message("Extracted features for 'game1' (now includes custom feature):");
+var _extracted_names = variable_struct_get_names(_extracted);
+for (var i = 0; i < array_length(_extracted_names); i++) {
+    show_debug_message("  " + _extracted_names[i] + ": " + string(_extracted[$ _extracted_names[i]]));
+}
+show_debug_message("");
+
+// STEP 8E: MODEL COMPARISON - LINEAR vs RANKNET vs LAMBDAMART
+
+show_debug_message("------------------------------------------------------------");
+show_debug_message("7E. MODEL COMPARISON (linear / ranknet / lambdamart)");
+show_debug_message("------------------------------------------------------------");
+
+var _compare_query = "fantasy rpg";
+var _model_names = ["linear", "ranknet", "lambdamart"];
+for (var m = 0; m < array_length(_model_names); m++) {
+    gmls_set_ltr_model(_model_names[m]);
+    var _comparison_results = gmls_search_ltr(_compare_query, 3);
+    show_debug_message("Model: " + _model_names[m]);
+    for (var i = 0; i < array_length(_comparison_results); i++) {
+        show_debug_message("  " + string(i+1) + ". " + _comparison_results[i].document.metadata.title + 
+                            " (ltr_score: " + string(_comparison_results[i].ltr_score) + 
+                            ", bm25: " + string(_comparison_results[i].original_score) + ")");
+    }
+}
+show_debug_message("");
+
 // STEP 9: ADVANCED SNIPPETS
 
 show_debug_message("------------------------------------------------------------");
@@ -330,6 +470,9 @@ show_debug_message("[UNIQUE WORDS] " + string(_main_stats.unique_words));
 show_debug_message("[FACETS INDEXED] " + string(ds_map_size(global.gmls.facet_index)));
 show_debug_message("[GEOTAGGED LOCATIONS] " + string(_geo_stats.total_locations));
 show_debug_message("[LTR EXAMPLES] " + string(_ltr_stats.training_examples));
+show_debug_message("[LTR ACTIVE MODEL] " + global.gmls.ltr_model);
+show_debug_message("[LAMBDAMART TREES] " + string(array_length(_lambdamart_result.ensemble.trees)));
+show_debug_message("[CUSTOM LTR FEATURES REGISTERED] " + string(ds_map_size(global.gmls.ltr_feature_extractors)));
 show_debug_message("[SNIPPET STRATEGY] " + global.gmls.snippet_config.strategy);
 show_debug_message("[QUERIES LOGGED] " + string(_qstats.total_queries));
 show_debug_message("[UNIQUE QUERIES] " + string(_qstats.unique_queries));

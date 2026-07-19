@@ -1,1 +1,1 @@
-gmui_render();
+//gmui_render();

@@ -49,7 +49,10 @@ function gmls_enable_ltr(_enabled) {
 function gmls_set_ltr_model(_model) {
     if (_model == "linear" || _model == "ranknet" || _model == "lambdamart") {
         global.gmls.ltr_model = _model;
+        return true;
     }
+    show_debug_message("GMLiteSearch: unknown LTR model '" + string(_model) + "' — model unchanged.");
+    return false;
 }
 
 function gmls_set_feature_weight(_feature_name, _weight) {
@@ -67,6 +70,9 @@ function gmls_register_feature_extractor(_feature_name, _script) {
     var _ls = global.gmls;
     if (variable_struct_exists(_ls, "ltr_feature_extractors")) {
         ds_map_add(_ls.ltr_feature_extractors, _feature_name, _script);
+    }
+    if (variable_struct_exists(_ls, "ltr_features") && !ds_map_exists(_ls.ltr_features, _feature_name)) {
+        ds_map_add(_ls.ltr_features, _feature_name, 0.5);
     }
 }
 
@@ -129,6 +135,27 @@ function _gmls_extract_features(_doc_id, _query, _search_result) {
     var _clicks = ds_map_exists(_ls.ltr_clicks, _doc_id) ? ds_map_find_value(_ls.ltr_clicks, _doc_id) : 0;
     var _impressions = ds_map_exists(_ls.ltr_impressions, _doc_id) ? ds_map_find_value(_ls.ltr_impressions, _doc_id) : 1;
     _features[$ "popularity"] = min(1.0, _clicks / max(1, _impressions) * 5);
+    
+    // custom feature extractors
+    if (variable_struct_exists(_ls, "ltr_feature_extractors")) {
+        var _extractor_name = ds_map_find_first(_ls.ltr_feature_extractors);
+        while (!is_undefined(_extractor_name)) {
+            var _extractor_fn = ds_map_find_value(_ls.ltr_feature_extractors, _extractor_name);
+            
+            try {
+                var _custom_value = _extractor_fn(_doc_id, _query, _search_result);
+                if (is_real(_custom_value)) {
+                    _features[$ _extractor_name] = _custom_value;
+                } else {
+                    show_debug_message("GMLiteSearch: feature extractor '" + _extractor_name + "' returned non-numeric value, skipped.");
+                }
+            } catch (_err) {
+                show_debug_message("GMLiteSearch: feature extractor '" + _extractor_name + "' threw an error, skipped.");
+            }
+            
+            _extractor_name = ds_map_find_next(_ls.ltr_feature_extractors, _extractor_name);
+        }
+    }
     
     return _features;
 }
@@ -363,4 +390,159 @@ function gmls_load_ltr_model(_json) {
     }
     
     return true;
+}
+
+function _gmls_rank_score(_features) {
+    var _ls = global.gmls;
+    
+    if (_ls.ltr_model == "lambdamart") {
+        var _ensemble = gmls_get_ltr_ensemble();
+        if (is_undefined(_ensemble)) {
+            return _gmls_linear_rank_score(_features);
+        }
+        return _gmls_ensemble_predict_raw(_ensemble, _features);
+    }
+    
+    return _gmls_linear_rank_score(_features);
+}
+
+function _gmls_build_training_pairs() {
+    var _ls = global.gmls;
+    var _training_size = ds_list_size(_ls.ltr_training_data);
+    var _by_query = ds_map_create();
+    
+    for (var i = 0; i < _training_size; i++) {
+        var _example = ds_list_find_value(_ls.ltr_training_data, i);
+        var _q = _example.query;
+        if (!ds_map_exists(_by_query, _q)) {
+            ds_map_add(_by_query, _q, ds_list_create());
+        }
+        var _indices = ds_map_find_value(_by_query, _q);
+        ds_list_add(_indices, i);
+    }
+    
+    var _pairs = [];
+    var _q = ds_map_find_first(_by_query);
+    while (!is_undefined(_q)) {
+        var _indices = ds_map_find_value(_by_query, _q);
+        var _n = ds_list_size(_indices);
+        for (var a = 0; a < _n; a++) {
+            for (var b = a + 1; b < _n; b++) {
+                var _idx_a = ds_list_find_value(_indices, a);
+                var _idx_b = ds_list_find_value(_indices, b);
+                var _ex_a = ds_list_find_value(_ls.ltr_training_data, _idx_a);
+                var _ex_b = ds_list_find_value(_ls.ltr_training_data, _idx_b);
+                
+                if (_ex_a.relevance == _ex_b.relevance) continue; // no signal
+                
+                var _higher = (_ex_a.relevance > _ex_b.relevance) ? _ex_a : _ex_b;
+                var _lower  = (_ex_a.relevance > _ex_b.relevance) ? _ex_b : _ex_a;
+                array_push(_pairs, { higher: _higher, lower: _lower });
+            }
+        }
+        ds_list_destroy(_indices);
+        _q = ds_map_find_next(_by_query, _q);
+    }
+    ds_map_destroy(_by_query);
+    return _pairs;
+}
+
+function gmls_train_ranknet_model(_iterations = 200, _learning_rate = 0.001) {
+    var _ls = global.gmls;
+    var _log = [];
+    
+    var _pairs = _gmls_build_training_pairs();
+    array_push(_log, "RankNet: built " + string(array_length(_pairs)) + " training pairs");
+    
+    if (array_length(_pairs) < 1) {
+        array_push(_log, "RankNet: need at least 1 valid pair (same query, differing relevance). Found 0.");
+        return _log;
+    }
+    
+    var _feature = ds_map_find_first(_ls.ltr_features);
+    while (!is_undefined(_feature)) {
+        if (ds_map_find_value(_ls.ltr_features, _feature) == 0) {
+            ds_map_set(_ls.ltr_features, _feature, 0.5);
+        }
+        _feature = ds_map_find_next(_ls.ltr_features, _feature);
+    }
+    
+    var _prev_loss = -1;
+    
+    for (var iter = 0; iter < _iterations; iter++) {
+        var _total_loss = 0;
+        
+        for (var p = 0; p < array_length(_pairs); p++) {
+            var _pair = _pairs[p];
+            var _score_higher = _gmls_linear_rank_score(_pair.higher.features);
+            var _score_lower  = _gmls_linear_rank_score(_pair.lower.features);
+            
+            var _diff = _score_higher - _score_lower;
+            var _prob = 1 / (1 + exp(-_diff));
+            var _target = 1;
+            
+            // cross-entropy loss
+            var _p_clamped = clamp(_prob, 0.0001, 0.9999);
+            _total_loss += -( _target * ln(_p_clamped) + (1 - _target) * ln(1 - _p_clamped) );
+            
+            var _grad_shared = (_prob - _target); // dLoss/dDiff
+            
+            var _feature_name = ds_map_find_first(_ls.ltr_features);
+            while (!is_undefined(_feature_name)) {
+                var _fv_higher = variable_struct_exists(_pair.higher.features, _feature_name) ? 
+                                 _pair.higher.features[$ _feature_name] : 0;
+                var _fv_lower = variable_struct_exists(_pair.lower.features, _feature_name) ? 
+                                _pair.lower.features[$ _feature_name] : 0;
+                
+                // d(diff)/d(weight) = fv_higher - fv_lower
+                var _gradient = _grad_shared * (_fv_higher - _fv_lower);
+                var _current_weight = ds_map_find_value(_ls.ltr_features, _feature_name);
+                var _new_weight = _current_weight - _learning_rate * _gradient;
+                ds_map_set(_ls.ltr_features, _feature_name, _new_weight);
+                
+                _feature_name = ds_map_find_next(_ls.ltr_features, _feature_name);
+            }
+        }
+        
+        var _avg_loss = _total_loss / array_length(_pairs);
+        
+        if (iter % 20 == 0 || iter == _iterations - 1) {
+            array_push(_log, "Iteration " + string(iter) + " - Pairwise loss: " + string(_avg_loss));
+        }
+        
+        if (_prev_loss > 0 && abs(_prev_loss - _avg_loss) < 0.0001) {
+            if (iter > 50) {
+                array_push(_log, "Converged at iteration " + string(iter));
+                break;
+            }
+        }
+        _prev_loss = _avg_loss;
+    }
+    
+    array_push(_log, "RankNet training complete");
+    return _log;
+}
+
+function gmls_evaluate_ranknet_model() {
+    var _ls = global.gmls;
+    var _pairs = _gmls_build_training_pairs();
+    
+    if (array_length(_pairs) < 1) {
+        return { error: true, message: "No valid pairs to evaluate", pairs_tested: 0, accuracy: 0 };
+    }
+    
+    var _correct = 0;
+    for (var p = 0; p < array_length(_pairs); p++) {
+        var _pair = _pairs[p];
+        var _score_higher = _gmls_linear_rank_score(_pair.higher.features);
+        var _score_lower  = _gmls_linear_rank_score(_pair.lower.features);
+        if (_score_higher > _score_lower) _correct++;
+    }
+    
+    return {
+        error: false,
+        pairs_tested: array_length(_pairs),
+        correct: _correct,
+        accuracy: _correct / array_length(_pairs)
+    };
 }

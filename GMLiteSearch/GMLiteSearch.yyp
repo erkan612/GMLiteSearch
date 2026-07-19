@@ -20,7 +20,7 @@
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
-    "IDEVersion":"2024.14.4.222",
+    "IDEVersion":"2026.0.0.16",
   },
   "name":"GMLiteSearch",
   "resources":[
@@ -31,6 +31,7 @@
     {"id":{"name":"GMLiteSearch_Document","path":"scripts/GMLiteSearch_Document/GMLiteSearch_Document.yy",},},
     {"id":{"name":"GMLiteSearch_Facet","path":"scripts/GMLiteSearch_Facet/GMLiteSearch_Facet.yy",},},
     {"id":{"name":"GMLiteSearch_Geo","path":"scripts/GMLiteSearch_Geo/GMLiteSearch_Geo.yy",},},
+    {"id":{"name":"GMLiteSearch_LambdaMART","path":"scripts/GMLiteSearch_LambdaMART/GMLiteSearch_LambdaMART.yy",},},
     {"id":{"name":"GMLiteSearch_LearningToRank","path":"scripts/GMLiteSearch_LearningToRank/GMLiteSearch_LearningToRank.yy",},},
     {"id":{"name":"GMLiteSearch_NGram","path":"scripts/GMLiteSearch_NGram/GMLiteSearch_NGram.yy",},},
     {"id":{"name":"GMLiteSearch_QueryUnderstanding","path":"scripts/GMLiteSearch_QueryUnderstanding/GMLiteSearch_QueryUnderstanding.yy",},},
