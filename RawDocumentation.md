@@ -446,6 +446,90 @@ var price_buckets = gmls_get_range_facet_counts("price", 0, 100, 20);
 
 ---
 
+### gmls_add_date_facet(doc_id, facet_name, datetime)
+Adds a date/time value for date-based faceting.
+
+**Parameters:**
+- `doc_id` (any) - Document identifier
+- `facet_name` (string) - Facet field name
+- `datetime` (datetime) - GameMaker datetime value
+
+**Returns:** Nothing
+
+**Example:**
+```gml
+gmls_add_date_facet("game1", "release_date", date_create_datetime(2024, 3, 15, 0, 0, 0));
+```
+
+---
+
+### gmls_add_date_filter(facet_name, start, end)
+Adds an active date range filter, or a named preset.
+
+**Parameters:**
+- `facet_name` (string) - Facet field name
+- `start` (datetime or string) - Start date, or a preset string (e.g. "last_30_days")
+- `end` (datetime, optional) - End date, omitted when using a preset
+
+**Returns:** Nothing
+
+**Example:**
+```gml
+gmls_add_date_filter("release_date", "last_30_days");
+```
+
+---
+
+### gmls_remove_date_filter(facet_name)
+Removes an active date filter.
+
+**Parameters:**
+- `facet_name` (string) - Facet field name
+
+**Returns:** Nothing
+
+**Example:**
+```gml
+gmls_remove_date_filter("release_date");
+```
+
+---
+
+### gmls_get_date_histogram(facet_name, interval, count, query, filters)
+Buckets documents into a date histogram.
+
+**Parameters:**
+- `facet_name` (string) - Facet field name
+- `interval` (string) - Bucket interval, e.g. "day", "month"
+- `count` (int) - Number of buckets to return
+- `query` (string, default: "") - Text filter
+- `filters` (array, optional) - Temporary filters
+
+**Returns:** Struct - { "bucket_key": count }
+
+**Example:**
+```gml
+var histogram = gmls_get_date_histogram("release_date", "month", 12, "", undefined);
+```
+
+---
+
+### gmls_update_document_facets(id, new_facets)
+Replaces the facet values for an existing document.
+
+**Parameters:**
+- `id` (any) - Document identifier
+- `new_facets` (struct) - Replacement facet name-value pairs
+
+**Returns:** bool - Success status
+
+**Example:**
+```gml
+gmls_update_document_facets("game1", { category: "action", platform: "console" });
+```
+
+---
+
 ## Geospatial Functions
 
 ### gmls_add_geolocation(doc_id, lat, lng, geohash_precision)
@@ -709,6 +793,8 @@ var neighbors = gmls_geohash_neighbors("dr5re");
 
 ## Learning-to-Rank Functions
 
+GMLiteSearch supports three trainable ranking models: **linear**, **RankNet**, and **LambdaMART**. All three share the same 7 built-in features (plus any custom features registered via `gmls_register_feature_extractor`) and can be trained on the same `gmls_add_training_example` data. The active model is selected with `gmls_set_ltr_model` and used automatically by `gmls_search_ltr`.
+
 ### gmls_enable_ltr(enabled)
 Enables or disables LTR ranking.
 
@@ -724,25 +810,41 @@ gmls_enable_ltr(true);
 
 ---
 
+### gmls_set_ltr_model(model)
+Selects the active LTR model.
+
+**Parameters:**
+- `model` (string) - "linear", "ranknet", or "lambdamart"
+
+**Returns:** bool - Success status. Returns false and leaves the model unchanged if the name isn't recognized.
+
+**Example:**
+```gml
+gmls_set_ltr_model("lambdamart");
+```
+
+---
+
 ### gmls_add_training_example(query, doc_id, relevance_score)
-Adds training data for LTR model.
+Adds training data for LTR models. Shared across linear, RankNet, and LambdaMART.
 
 **Parameters:**
 - `query` (string) - Search query
 - `doc_id` (any) - Document identifier
-- `relevance_score` (float) - Relevance (0-1, higher = more relevant)
+- `relevance_score` (real) - Relevance label. Higher means more relevant; the scale is up to you as long as it's used consistently across a query's competing documents
 
 **Returns:** bool - Success status
 
 **Example:**
 ```gml
-gmls_add_training_example("fantasy rpg", "game1", 1.0);
+gmls_add_training_example("fantasy rpg", "game1", 3);
+gmls_add_training_example("fantasy rpg", "game2", 0);
 ```
 
 ---
 
 ### gmls_train_linear_model(iterations, learning_rate)
-Trains the linear ranking model.
+Trains the linear ranking model via gradient descent against absolute relevance labels.
 
 **Parameters:**
 - `iterations` (int, default: 200) - Training iterations
@@ -756,6 +858,198 @@ var log = gmls_train_linear_model(100, 0.005);
 for (var i = 0; i < array_length(log); i++) {
     show_debug_message(log[i]);
 }
+```
+
+---
+
+### gmls_train_ranknet_model(iterations, learning_rate)
+Trains the RankNet model. Builds pairs of training examples that share the same query but have different relevance labels, and trains so the higher-relevance document's score exceeds the lower-relevance document's score.
+
+**Parameters:**
+- `iterations` (int, default: 200) - Training iterations
+- `learning_rate` (float, default: 0.001) - Step size
+
+**Returns:** Array of log strings
+
+**Example:**
+```gml
+var log = gmls_train_ranknet_model(100, 0.01);
+```
+
+---
+
+### gmls_evaluate_ranknet_model()
+Evaluates the trained RankNet model's pairwise accuracy against its own training data.
+
+**Parameters:** None
+
+**Returns:** Struct with fields:
+- `error` (bool)
+- `pairs_tested` (int)
+- `correct` (int)
+- `accuracy` (real) - Fraction of pairs ranked in the correct relative order
+
+**Example:**
+```gml
+var eval = gmls_evaluate_ranknet_model();
+show_debug_message("Accuracy: " + string(eval.accuracy));
+```
+
+---
+
+### gmls_train_regression_tree(samples, feature_names, max_depth, min_samples_leaf)
+Trains a single regression tree. Used internally by LambdaMART, and available directly for custom boosting setups.
+
+**Parameters:**
+- `samples` (array) - Array of `{ features: struct, target: real }`
+- `feature_names` (array) - Feature names to consider for splits
+- `max_depth` (int, default: 3) - Maximum tree depth
+- `min_samples_leaf` (int, default: 1) - Minimum samples required in each leaf
+
+**Returns:** Tree struct (leaf: `{ is_leaf: true, value }`, split: `{ is_leaf: false, feature, threshold, left, right }`)
+
+**Example:**
+```gml
+var tree = gmls_train_regression_tree(samples, ["bm25_score", "title_match"], 3, 1);
+```
+
+---
+
+### gmls_tree_predict(tree, features)
+Predicts a value for one set of features using a trained regression tree.
+
+**Parameters:**
+- `tree` (struct) - A tree returned by `gmls_train_regression_tree`
+- `features` (struct) - Feature values to predict from
+
+**Returns:** real - Predicted value
+
+**Example:**
+```gml
+var prediction = gmls_tree_predict(tree, { bm25_score: 0.7 });
+```
+
+---
+
+### gmls_train_tree_ensemble(samples, feature_names, n_trees, learning_rate, max_depth, min_samples_leaf)
+Trains a gradient-boosted ensemble of regression trees against absolute targets. General-purpose boosting, distinct from LambdaMART's ranking-specific training.
+
+**Parameters:**
+- `samples` (array) - Array of `{ features: struct, target: real }`
+- `feature_names` (array) - Feature names to consider for splits
+- `n_trees` (int, default: 20) - Number of boosting rounds
+- `learning_rate` (float, default: 0.1) - Shrinkage applied to each tree's contribution
+- `max_depth` (int, default: 3) - Maximum depth per tree
+- `min_samples_leaf` (int, default: 1) - Minimum samples required in each leaf
+
+**Returns:** Struct with fields:
+- `ensemble` (struct) - `{ initial_value, trees: [...], learning_rate }`
+- `log` (array) - Training log strings
+
+**Example:**
+```gml
+var result = gmls_train_tree_ensemble(samples, ["bm25_score"], 30, 0.15, 2, 1);
+```
+
+---
+
+### gmls_ensemble_predict(ensemble, features)
+Predicts a value for one set of features using a trained tree ensemble.
+
+**Parameters:**
+- `ensemble` (struct) - An ensemble returned by `gmls_train_tree_ensemble` or `gmls_train_lambdamart_model`
+- `features` (struct) - Feature values to predict from
+
+**Returns:** real - Predicted value
+
+**Example:**
+```gml
+var prediction = gmls_ensemble_predict(ensemble, { bm25_score: 0.7, title_match: 1.0 });
+```
+
+---
+
+### gmls_ndcg(relevances, k)
+Computes Normalized Discounted Cumulative Gain for a list of relevance values in ranked order.
+
+**Parameters:**
+- `relevances` (array) - Relevance values in current ranked order (position 0 = rank 1)
+- `k` (int, default: -1) - Cutoff rank; -1 considers the full list
+
+**Returns:** real - NDCG score between 0 and 1
+
+**Example:**
+```gml
+var score = gmls_ndcg([3, 2, 1, 0]);
+```
+
+---
+
+### gmls_compute_lambda_gradients(samples, current_scores)
+Computes LambdaMART's per-document training gradients. Used internally by `gmls_train_lambdamart_model`; exposed for custom training loops.
+
+**Parameters:**
+- `samples` (array) - Array of `{ features: struct, target: real, query: string, doc_id: any }`
+- `current_scores` (array) - Current predicted score per sample, same order as `samples`
+
+**Returns:** Array of real - Lambda gradient per sample, same order as `samples`
+
+**Example:**
+```gml
+var lambdas = gmls_compute_lambda_gradients(samples, current_scores);
+```
+
+---
+
+### gmls_train_lambdamart_model(samples, feature_names, n_trees, learning_rate, max_depth, min_samples_leaf)
+Trains a LambdaMART model: a gradient-boosted tree ensemble optimized against NDCG-weighted pairwise ranking gradients, rather than absolute relevance regression.
+
+**Parameters:**
+- `samples` (array) - Array of `{ features: struct, target: real (relevance), query: string, doc_id: any }`
+- `feature_names` (array) - Feature names to consider for splits
+- `n_trees` (int, default: 20) - Number of boosting rounds
+- `learning_rate` (float, default: 0.1) - Shrinkage applied to each tree's contribution
+- `max_depth` (int, default: 3) - Maximum depth per tree
+- `min_samples_leaf` (int, default: 1) - Minimum samples required in each leaf
+
+**Returns:** Struct with fields:
+- `ensemble` (struct) - `{ initial_value, trees: [...], learning_rate }`
+- `log` (array) - Training log strings, including average NDCG per round
+
+**Example:**
+```gml
+var result = gmls_train_lambdamart_model(samples, ["bm25_score", "title_match"], 25, 0.15, 3, 2);
+gmls_set_ltr_ensemble(result.ensemble);
+gmls_set_ltr_model("lambdamart");
+```
+
+---
+
+### gmls_set_ltr_ensemble(ensemble)
+Sets the active LambdaMART tree ensemble used for scoring when `ltr_model` is `"lambdamart"`.
+
+**Parameters:**
+- `ensemble` (struct) - An ensemble returned by `gmls_train_lambdamart_model`
+
+**Returns:** Nothing
+
+**Example:**
+```gml
+gmls_set_ltr_ensemble(result.ensemble);
+```
+
+---
+
+### gmls_get_ltr_ensemble()
+Returns the currently active LambdaMART tree ensemble.
+
+**Parameters:** None
+
+**Returns:** struct or undefined
+
+**Example:**
+```gml
+var ensemble = gmls_get_ltr_ensemble();
 ```
 
 ---
@@ -791,18 +1085,19 @@ gmls_record_click_from_result(0);
 ---
 
 ### gmls_search_ltr(query, max_results)
-Searches using LTR ranking.
+Searches using the currently active LTR model (linear, RankNet, or LambdaMART).
 
 **Parameters:**
 - `query` (string) - Search query
 - `max_results` (int, optional) - Maximum results
 
 **Returns:** Array of result structs with added fields:
-- `ltr_score` (float) - LTR score
+- `ltr_score` (float) - Score from the active LTR model
 - `original_score` (float) - Original BM25 score
 
 **Example:**
 ```gml
+gmls_set_ltr_model("ranknet");
 var results = gmls_search_ltr("fantasy", 10);
 ```
 
@@ -815,9 +1110,9 @@ Returns LTR statistics.
 
 **Returns:** Struct with fields:
 - `enabled` (bool)
-- `model` (string)
+- `model` (string) - Currently active model
 - `training_examples` (int)
-- `feature_weights` (struct)
+- `feature_weights` (struct) - Linear/RankNet weights (not meaningful for LambdaMART; use the ensemble directly)
 - `total_clicks` (int)
 - `total_impressions` (int)
 
@@ -830,7 +1125,7 @@ var weights = stats.feature_weights;
 ---
 
 ### gmls_save_ltr_model()
-Exports LTR model to JSON.
+Exports the active LTR model to JSON. Works for all three models: linear and RankNet are saved as a feature-weight map, LambdaMART is saved as a serialized tree ensemble.
 
 **Parameters:** None
 
@@ -844,7 +1139,7 @@ var model_json = gmls_save_ltr_model();
 ---
 
 ### gmls_load_ltr_model(json)
-Imports LTR model from JSON.
+Imports an LTR model from JSON, restoring both the model type and its trained state. Detects and correctly loads either format saved by `gmls_save_ltr_model()`.
 
 **Parameters:**
 - `json` (string) - JSON model data
@@ -858,8 +1153,37 @@ gmls_load_ltr_model(model_json);
 
 ---
 
+### gmls_save_lambdamart_model()
+Exports the active LambdaMART tree ensemble to JSON directly. Equivalent to `gmls_save_ltr_model()` when `ltr_model` is `"lambdamart"`.
+
+**Parameters:** None
+
+**Returns:** string - JSON representation of the tree ensemble
+
+**Example:**
+```gml
+var model_json = gmls_save_lambdamart_model();
+```
+
+---
+
+### gmls_load_lambdamart_model(json)
+Imports a LambdaMART tree ensemble from JSON directly.
+
+**Parameters:**
+- `json` (string) - JSON ensemble data
+
+**Returns:** bool - Success status
+
+**Example:**
+```gml
+gmls_load_lambdamart_model(model_json);
+```
+
+---
+
 ### gmls_evaluate_model(test_ratio)
-Evaluates LTR model on test data.
+Evaluates the linear model on held-out training data.
 
 **Parameters:**
 - `test_ratio` (float, default: 0.2) - Portion of data for testing
@@ -880,7 +1204,7 @@ show_debug_message("RMSE: " + string(eval.rmse));
 ---
 
 ### gmls_set_feature_weight(feature_name, weight)
-Sets weight for a specific feature.
+Sets weight for a specific feature. Applies to the linear and RankNet models.
 
 **Parameters:**
 - `feature_name` (string) - Feature name
@@ -895,21 +1219,21 @@ gmls_set_feature_weight("title_match", 1.5);
 
 ---
 
-### gmls_register_feature_extractor(feature_name, script)
-Registers a custom feature extractor function.
+### gmls_register_feature_extractor(feature_name, function)
+Registers a custom feature extractor. The feature is automatically computed on every search and included in scoring for all three LTR models, with a default weight.
 
 **Parameters:**
 - `feature_name` (string) - Feature name
-- `script` (script/function) - Function that returns a float
+- `function` (function) - Function with signature `(doc_id, query, search_result)` that returns a real number. Extractors that throw or return a non-numeric value are skipped for that document rather than interrupting search.
 
 **Returns:** Nothing
 
 **Example:**
 ```gml
-function my_feature(doc_id, query, doc) {
+var my_extractor = function(_doc_id, _query, _search_result) {
     return 0.5;
-}
-gmls_register_feature_extractor("my_feature", my_feature);
+};
+gmls_register_feature_extractor("my_feature", my_extractor);
 ```
 
 ---
@@ -1362,7 +1686,7 @@ All search functions return an array of result structs with the following fields
 **Additional fields for LTR search:**
 | Field | Type | Description |
 |-------|------|-------------|
-| `ltr_score` | float | LTR model score |
+| `ltr_score` | float | Score from the active LTR model (linear, RankNet, or LambdaMART) |
 | `original_score` | float | Original BM25 score |
 
 **Additional fields for geospatial search:**
@@ -1398,6 +1722,7 @@ Access via `global.gmls`:
 | `ngram_size` | int | 3 | N-gram length |
 | `max_doc_size` | int | 50000 | Max characters per doc |
 | `ltr_enabled` | bool | false | LTR active |
+| `ltr_model` | string | "linear" | Active LTR model: "linear", "ranknet", or "lambdamart" |
 | `suggestions_enabled` | bool | true | Auto-complete |
 | `auto_correct_enabled` | bool | true | Spell checking |
 | `max_suggestions` | int | 5 | Suggestions limit |
