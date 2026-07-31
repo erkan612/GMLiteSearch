@@ -138,6 +138,48 @@ GMLiteSearch is a complete search solution for GameMaker, designed for small to 
 
 ---
 
-## License
+## References
+---
 
-MIT License – Free for commercial and non-commercial use
+**Relevance scoring (BM25 & TF-IDF)**
+Spärck Jones, K. (1972) "[A statistical interpretation of term specificity and its application in retrieval](https://www.emerald.com/jd/article/28/1/11/218980)", Journal of Documentation, 28(1), 11–21
+Robertson, S. E. and Walker, S. (1994) "[Some Simple Effective Approximations to the 2-Poisson Model for Probabilistic Weighted Retrieval](http://www.staff.city.ac.uk/~sb317/papers/robertson_walker_sigir94.pdf)", SIGIR '94, 232–241
+Robertson, S. and Zaragoza, H. (2009) "[The Probabilistic Relevance Framework: BM25 and Beyond](https://dl.acm.org/doi/10.1561/1500000019)", Foundations and Trends in Information Retrieval, 3(4), 333–389
+Robertson, S., Zaragoza, H. and Taylor, M. (2004) "[Simple BM25 Extension to Multiple Weighted Fields](https://dl.acm.org/doi/10.1145/1031171.1031181)", CIKM '04
+
+**Stemming**
+Porter, M. F. (1980) "[An algorithm for suffix stripping](https://www.emerald.com/insight/content/doi/10.1108/eb046814/full/html)", Program, 14(3), 130–137
+"[The English (Porter2) stemming algorithm](https://snowballstem.org/algorithms/english/stemmer.html)", Snowball
+
+**Fuzzy matching & n-gram search**
+Jaccard, P. (1912) "[The Distribution of the Flora in the Alpine Zone](https://nph.onlinelibrary.wiley.com/doi/10.1111/j.1469-8137.1912.tb05611.x)", New Phytologist, 11(2), 37–50
+Kondrak, G. (2005) "[N-Gram Similarity and Distance](https://webdocs.cs.ualberta.ca/~kondrak/papers/spire05.pdf)", SPIRE 2005
+
+**Spell correction**
+Levenshtein, V. I. (1965; English translation 1966) "[Binary codes capable of correcting deletions, insertions and reversals](https://nymity.ch/sybilhunting/pdf/Levenshtein1966a.pdf)", Soviet Physics Doklady, 10(8), 707–710
+Wagner, R. A. and Fischer, M. J. (1974) "[The String-to-String Correction Problem](https://dl.acm.org/doi/10.1145/321796.321811)", Journal of the ACM, 21(1), 168–173
+
+**Faceted search**
+Yee, K-P., Swearingen, K., Li, K. and Hearst, M. (2003) "[Faceted Metadata for Image Search and Browsing](https://dl.acm.org/doi/10.1145/642611.642681)", CHI '03
+
+**Date/time handling**
+ISO 8601:2019 "[Date and time, Representations for information interchange](https://www.iso.org/iso-8601-date-and-time-format.html)", ISO
+
+**Geospatial search**
+Sinnott, R. W. (1984) "[Virtues of the Haversine](https://babel.hathitrust.org/cgi/pt?id=uc1.b3342444&seq=444)", Sky and Telescope, 68(2), 159
+Morton, G. M. (1966) "[A Computer Oriented Geodetic Data Base and a New Technique in File Sequencing](http://web.cs.ucla.edu/~weiwang/paper/computerdb.pdf)", IBM Technical Report
+Niemeyer, G. (2008) "[Geohash](https://en.wikipedia.org/wiki/Geohash)"
+
+**Learning-to-Rank, linear model**
+Cauchy, A-L. (1847) "Méthode générale pour la résolution des systèmes d'équations simultanées", Comptes Rendus de l'Académie des Sciences, 25, 536–538
+Liu, T-Y. (2009) "[Learning to Rank for Information Retrieval](https://www.nowpublishers.com/article/Details/INR-016)", Foundations and Trends in Information Retrieval, 3(3), 225–331
+
+**Learning-to-Rank, RankNet**
+Burges, C., Shaked, T., Renshaw, E., Lazier, A., Deeds, M., Hamilton, N. and Hullender, G. (2005) "[Learning to Rank using Gradient Descent](https://icml.cc/Conferences/2015/wp-content/uploads/2015/06/icml_ranking.pdf)", ICML '05, 89–96
+
+**Learning-to-Rank, LambdaMART, gradient boosting, and NDCG**
+Breiman, L., Friedman, J. H., Olshen, R. A. and Stone, C. J. (1984) "Classification and Regression Trees", Wadsworth
+Friedman, J. H. (2001) "[Greedy Function Approximation: A Gradient Boosting Machine](https://www.jstor.org/stable/2699986)", The Annals of Statistics, 29(5), 1189–1232
+Järvelin, K. and Kekäläinen, J. (2002) "[Cumulated Gain-Based Evaluation of IR Techniques](https://dl.acm.org/doi/10.1145/582415.582418)", ACM Transactions on Information Systems, 20(4), 422–446
+Burges, C. J. C. (2010) "[From RankNet to LambdaRank to LambdaMART: An Overview](https://www.microsoft.com/en-us/research/publication/from-ranknet-to-lambdarank-to-lambdamart-an-overview/)", Microsoft Research Technical Report MSR-TR-2010-82
+Wu, Q., Burges, C. J. C., Svore, K. M. and Gao, J. (2010) "[Adapting Boosting for Information Retrieval Measures](https://www.microsoft.com/en-us/research/publication/adapting-boosting-information-retrieval-measures/)", Information Retrieval, 13(3), 254–270
