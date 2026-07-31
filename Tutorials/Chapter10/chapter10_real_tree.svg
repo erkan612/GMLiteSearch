@@ -1,0 +1,33 @@
+<svg width="680" height="280" viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>A real regression tree trained on lambda gradients</title>
+<desc>The tree splits on bm25_score at 0.375, then splits the lower branch again at 0.125, producing three leaves with different predicted correction values.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#73726c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect width="680" height="280" fill="#ffffff"/>
+
+<rect x="255" y="30" width="170" height="50" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="340" y="55" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#2C2C2A">bm25_score ≤ 0.375?</text>
+
+<line x1="290" y1="80" x2="180" y2="125" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="210" y="105" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">yes</text>
+<line x1="390" y1="80" x2="500" y2="180" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="465" y="115" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">no</text>
+
+<rect x="90" y="127" width="180" height="50" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="180" y="152" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#04342C">bm25_score ≤ 0.125?</text>
+
+<line x1="130" y1="177" x2="90" y2="220" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="90" y="200" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">yes</text>
+<line x1="230" y1="177" x2="270" y2="220" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
+<text x="270" y="200" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">no</text>
+
+<rect x="20" y="222" width="140" height="44" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="90" y="244" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">-0.084</text>
+<rect x="200" y="222" width="140" height="44" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+<text x="270" y="244" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#412402">+0.016</text>
+<rect x="430" y="182" width="140" height="44" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.5"/>
+<text x="500" y="204" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#173404">+0.297</text>
+
+<text x="340" y="270" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">these are the CORRECTIONS added to a document's running score, not the score itself</text>
+</svg>

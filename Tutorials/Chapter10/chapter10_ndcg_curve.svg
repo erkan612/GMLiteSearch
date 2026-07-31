@@ -1,0 +1,24 @@
+<svg width="680" height="300" viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>NDCG's rank discount drops off quickly, then flattens</title>
+<desc>Relative weight starts at 1.0 for rank 1 and drops sharply through the first few ranks, then flattens out — meaning the difference between rank 1 and rank 2 matters far more than the difference between rank 7 and rank 8.</desc>
+<rect width="680" height="300" fill="#ffffff"/>
+
+<line x1="60" y1="250" x2="620" y2="250" stroke="#2c2c2a" stroke-width="1"/>
+<line x1="60" y1="250" x2="60" y2="40" stroke="#2c2c2a" stroke-width="1"/>
+
+<path d="M 100 50 L 165 129 L 230 175 L 295 199 L 360 217 L 425 230 L 490 240 L 555 246" fill="none" stroke="#0F6E56" stroke-width="2.5"/>
+
+<circle cx="100" cy="50" r="5" fill="#0F6E56"/>
+<text x="100" y="35" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">rank 1: 1.00</text>
+
+<circle cx="165" cy="129" r="5" fill="#0F6E56"/>
+<text x="165" y="150" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">rank 2: 0.63</text>
+
+<circle cx="295" cy="199" r="5" fill="#0F6E56"/>
+<text x="295" y="220" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">rank 4: 0.43</text>
+
+<circle cx="555" cy="246" r="5" fill="#0F6E56"/>
+<text x="555" y="230" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">rank 8: 0.32</text>
+
+<text x="340" y="275" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">rank position</text>
+</svg>

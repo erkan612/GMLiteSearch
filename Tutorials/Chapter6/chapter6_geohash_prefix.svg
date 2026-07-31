@@ -1,0 +1,21 @@
+<svg width="680" height="260" viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Nearby points share geohash prefixes, distant points do not</title>
+<desc>Two points about 500 meters apart share the first 5 characters of their geohash. A point on the other side of the country shares none of the characters.</desc>
+<rect width="680" height="260" fill="#ffffff"/>
+
+<text x="340" y="26" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#2c2c2a">two points ~500m apart in the same city</text>
+<rect x="140" y="45" width="200" height="40" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="240" y="65" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#04342C">dr5re gw3</text>
+<rect x="360" y="45" width="200" height="40" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="460" y="65" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#04342C">dr5re uq7</text>
+<text x="340" y="105" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">share the first 5 characters — "dr5re"</text>
+
+<text x="340" y="150" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#2c2c2a">two points on opposite coasts</text>
+<rect x="140" y="169" width="200" height="40" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="240" y="189" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#4A1B0C">dr5regw3</text>
+<rect x="360" y="169" width="200" height="40" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="460" y="189" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#4A1B0C">9q5ctr18</text>
+<text x="340" y="229" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">share ZERO characters — completely different prefix</text>
+
+<text x="340" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">this is what makes searching by geohash prefix a fast proximity check</text>
+</svg>

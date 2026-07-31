@@ -1,0 +1,17 @@
+<svg width="680" height="300" viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Two different kinds of date preset boundaries</title>
+<desc>Some presets like last 30 days use a rolling window that ends at the exact current moment. Other presets like today and this month snap to day-aligned midnight boundaries.</desc>
+<rect width="680" height="300" fill="#ffffff"/>
+
+<rect x="40" y="30" width="600" height="110" rx="14" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="60" y="56" font-family="sans-serif" font-size="14" font-weight="500" fill="#26215C">rolling-window presets</text>
+<text x="60" y="76" font-family="sans-serif" font-size="12" fill="#3C3489">last_7_days, last_30_days</text>
+<rect x="70" y="90" width="540" height="36" rx="6" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="340" y="108" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#2C2C2A">[30 days before RIGHT NOW, RIGHT NOW] — moves every second</text>
+
+<rect x="40" y="160" width="600" height="120" rx="14" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="60" y="186" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">day-aligned presets</text>
+<text x="60" y="206" font-family="sans-serif" font-size="12" fill="#085041">today, yesterday, this_month, last_month, this_year, last_year</text>
+<rect x="70" y="220" width="540" height="36" rx="6" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="340" y="238" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#2C2C2A">[midnight of the 1st, midnight of next period] — snaps to calendar lines</text>
+</svg>

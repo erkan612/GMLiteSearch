@@ -1,0 +1,32 @@
+<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Inverted index structure</title>
+<desc>A word like "fire" maps to a list of document IDs that contain that word, similar to an index at the back of a textbook.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#73726c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect width="680" height="340" fill="#ffffff"/>
+
+<rect x="40" y="40" width="600" height="260" rx="20" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="60" y="66" font-family="sans-serif" font-size="14" font-weight="500" fill="#26215C">Inverted index</text>
+<text x="60" y="84" font-family="sans-serif" font-size="12" fill="#3C3489">word to document list</text>
+
+<rect x="70" y="110" width="120" height="40" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="130" y="130" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">"sword"</text>
+<line x1="190" y1="130" x2="228" y2="130" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="230" y="110" width="380" height="40" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="420" y="130" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#2C2C2A">itm_002, itm_006</text>
+
+<rect x="70" y="165" width="120" height="40" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="130" y="185" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">"fire"</text>
+<line x1="190" y1="185" x2="228" y2="185" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="230" y="165" width="380" height="40" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="420" y="185" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#2C2C2A">itm_002, itm_018, itm_023, itm_035</text>
+
+<rect x="70" y="220" width="120" height="40" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="130" y="240" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">"potion"</text>
+<line x1="190" y1="240" x2="228" y2="240" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
+<rect x="230" y="220" width="380" height="40" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="420" y="240" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" fill="#2C2C2A">itm_033, itm_034, itm_035, itm_036...</text>
+
+<text x="335" y="320" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">gmls_add_document builds this table for you, one word at a time</text>
+</svg>

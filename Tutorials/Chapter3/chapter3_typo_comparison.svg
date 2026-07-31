@@ -1,0 +1,25 @@
+<svg width="680" height="320" viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Fuzzy search handles missing-letter typos better than transposition typos</title>
+<desc>A missing letter typically keeps most bigrams intact, but swapping two adjacent letters disrupts nearly every bigram touching that region.</desc>
+<rect width="680" height="320" fill="#ffffff"/>
+
+<text x="170" y="30" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#2c2c2a">Missing letter</text>
+<rect x="40" y="50" width="260" height="100" rx="12" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.5"/>
+<text x="170" y="76" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#173404">"dager" vs "dagger"</text>
+<text x="170" y="98" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#27500A">one letter dropped</text>
+<text x="170" y="122" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#173404">similarity: 0.800</text>
+<text x="170" y="140" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#27500A">passes the 0.6 threshold</text>
+
+<text x="510" y="30" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#2c2c2a">Transposition</text>
+<rect x="380" y="50" width="260" height="100" rx="12" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="510" y="76" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4A1B0C">"gaurd" vs "guard"</text>
+<text x="510" y="98" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#712B13">two adjacent letters swapped</text>
+<text x="510" y="122" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">similarity: 0.143</text>
+<text x="510" y="140" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#712B13">fails the 0.6 threshold</text>
+
+<rect x="90" y="180" width="500" height="110" rx="12" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="340" y="202" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">why the difference is so large</text>
+<text x="340" y="224" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">dropping one letter mostly leaves nearby letter-pairs intact</text>
+<text x="340" y="242" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">swapping two adjacent letters rewrites every bigram touching them</text>
+<text x="340" y="264" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">"ga" becomes "ag", "au" becomes "ua" — almost nothing survives the swap</text>
+</svg>

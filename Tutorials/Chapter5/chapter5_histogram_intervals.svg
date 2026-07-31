@@ -1,0 +1,31 @@
+<svg width="680" height="260" viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Date histogram intervals produce different bucket label formats</title>
+<desc>The day, week, month, and year intervals each produce a different label format and a different number of documents grouped per bucket.</desc>
+<rect width="680" height="260" fill="#ffffff"/>
+
+<rect x="40" y="30" width="140" height="70" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="110" y="54" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">"day"</text>
+<text x="110" y="76" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">"2026-07-19"</text>
+<text x="110" y="92" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">one bucket per date</text>
+
+<rect x="195" y="30" width="140" height="70" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="265" y="54" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">"week"</text>
+<text x="265" y="76" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">"2026-07-13"</text>
+<text x="265" y="92" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">labeled by week start</text>
+
+<rect x="350" y="30" width="140" height="70" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="420" y="54" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">"month"</text>
+<text x="420" y="76" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">"2026-07"</text>
+<text x="420" y="92" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">one bucket per month</text>
+
+<rect x="505" y="30" width="135" height="70" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="572" y="54" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">"year"</text>
+<text x="572" y="76" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">"2026"</text>
+<text x="572" y="92" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">one bucket per year</text>
+
+<rect x="60" y="130" width="560" height="110" rx="12" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="80" y="152" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">the count parameter sets how many buckets, starting from the</text>
+<text x="80" y="170" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">EARLIEST matching date, not from today going backward</text>
+<text x="80" y="196" font-family="sans-serif" font-size="12" fill="#5F5E5A">gmls_get_date_histogram("release_date", "month", 12, "", undefined)</text>
+<text x="80" y="214" font-family="sans-serif" font-size="12" fill="#5F5E5A">walks forward 12 months starting at the oldest release in your filtered set</text>
+</svg>

@@ -1,0 +1,29 @@
+<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Two separate bucketing systems for range facets</title>
+<desc>Adding a range facet sorts each price into one of five fixed buckets automatically. Querying range facet counts uses a completely separate, flexible bucket size chosen at query time.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#73726c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect width="680" height="340" fill="#ffffff"/>
+
+<text x="340" y="28" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#2c2c2a">gmls_add_range_facet — fixed buckets, decided automatically</text>
+<rect x="40" y="45" width="100" height="36" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text x="90" y="63" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#085041">0-9</text>
+<rect x="150" y="45" width="100" height="36" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text x="200" y="63" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#085041">10-19</text>
+<rect x="260" y="45" width="100" height="36" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text x="310" y="63" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#085041">20-49</text>
+<rect x="370" y="45" width="100" height="36" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text x="420" y="63" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#085041">50-99</text>
+<rect x="480" y="45" width="100" height="36" rx="6" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/><text x="530" y="63" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#085041">100+</text>
+<text x="340" y="100" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">$27.99 always lands in "20-49" — no choice offered at add time</text>
+
+<line x1="340" y1="120" x2="340" y2="150" stroke="#73726c" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+<text x="340" y="175" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#2c2c2a">gmls_get_range_facet_counts — you choose the bucket size, at query time</text>
+<rect x="60" y="192" width="130" height="36" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text x="125" y="210" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#3C3489">$0-19</text>
+<rect x="195" y="192" width="130" height="36" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text x="260" y="210" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#3C3489">$20-39</text>
+<rect x="330" y="192" width="130" height="36" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text x="395" y="210" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#3C3489">$40-59</text>
+<rect x="465" y="192" width="130" height="36" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/><text x="530" y="210" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#3C3489">$60-79</text>
+<text x="340" y="247" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">gmls_get_range_facet_counts("price", 0, 80, 20) — any width you want</text>
+
+<rect x="60" y="270" width="560" height="55" rx="10" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="80" y="292" font-family="sans-serif" font-size="12" fill="#5F5E5A">these two bucket systems are independent — the fixed add-time buckets</text>
+<text x="80" y="310" font-family="sans-serif" font-size="12" fill="#5F5E5A">exist for basic filtering, the query-time buckets are for custom reports</text>
+</svg>

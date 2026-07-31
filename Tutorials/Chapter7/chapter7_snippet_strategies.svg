@@ -1,0 +1,32 @@
+<svg width="680" height="320" viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Three different snippet generation strategies</title>
+<desc>Best fragment selects several high-scoring windows around matches. Surrounding centers one window on the best cluster of matches. Balanced scores whole sentences and picks the best ones, keeping them grammatically complete.</desc>
+<rect width="680" height="320" fill="#ffffff"/>
+
+<rect x="30" y="40" width="200" height="120" rx="12" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="130" y="64" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#04342C">best_fragment</text>
+<text x="130" y="86" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">several scored windows</text>
+<text x="130" y="102" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">joined with " ... "</text>
+<text x="130" y="122" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">default strategy</text>
+<text x="130" y="142" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#085041">good general coverage</text>
+
+<rect x="240" y="40" width="200" height="120" rx="12" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="340" y="64" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#26215C">surrounding</text>
+<text x="340" y="86" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#3C3489">ONE window, centered on</text>
+<text x="340" y="102" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#3C3489">the best match cluster</text>
+<text x="340" y="122" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#3C3489">simple, single excerpt</text>
+<text x="340" y="142" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#3C3489">no fragment joining</text>
+
+<rect x="450" y="40" width="200" height="120" rx="12" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="550" y="64" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">balanced</text>
+<text x="550" y="86" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#712B13">scores WHOLE sentences</text>
+<text x="550" y="102" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#712B13">picks the best-scoring ones</text>
+<text x="550" y="122" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#712B13">always grammatically</text>
+<text x="550" y="142" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#712B13">complete, never mid-word</text>
+
+<rect x="60" y="200" width="560" height="100" rx="12" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="80" y="224" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">the practical tradeoff</text>
+<text x="80" y="248" font-family="sans-serif" font-size="12" fill="#5F5E5A">best_fragment and surrounding use FIXED-WIDTH character windows —</text>
+<text x="80" y="266" font-family="sans-serif" font-size="12" fill="#5F5E5A">fast, but can cut off mid-word. balanced respects sentence boundaries —</text>
+<text x="80" y="284" font-family="sans-serif" font-size="12" fill="#5F5E5A">always reads cleanly, but fragment length varies with sentence length.</text>
+</svg>

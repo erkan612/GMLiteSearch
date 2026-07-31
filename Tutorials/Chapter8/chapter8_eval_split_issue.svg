@@ -1,0 +1,17 @@
+<svg width="680" height="260" viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>The evaluation test set is the last examples in insertion order, not a random sample</title>
+<desc>If positive examples were added first and negative examples added afterward, the automatically selected test set can end up containing only one kind of example, giving a misleading evaluation.</desc>
+<rect width="680" height="260" fill="#ffffff"/>
+
+<rect x="40" y="50" width="600" height="60" rx="8" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="60" y="72" font-family="sans-serif" font-size="12" fill="#5F5E5A">16 positive examples added first</text>
+<text x="60" y="94" font-family="sans-serif" font-size="12" fill="#5F5E5A">4 negative examples added afterward</text>
+
+<rect x="500" y="50" width="140" height="60" fill="none" stroke="#993C1D" stroke-width="2" stroke-dasharray="4 4"/>
+<text x="570" y="130" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#2c2c2a">test set</text>
+<text x="570" y="148" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#5F5E5A">(last 20%)</text>
+
+<rect x="60" y="180" width="560" height="60" rx="10" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="80" y="202" font-family="sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">the test set ends up ALL negative examples</text>
+<text x="80" y="222" font-family="sans-serif" font-size="12" fill="#712B13">an evaluation this skewed doesn't reflect real-world performance —</text>
+</svg>
