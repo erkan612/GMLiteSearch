@@ -58,6 +58,6 @@ The final chapter, and the most demanding one. Builds decision trees and gradien
 
 ## Where to go from here
 
-If you're new to GMLiteSearch, start at Chapter 1 and work through in order, the series is built to be read that way, with each chapter assuming you have the concepts from everything before it. If you're looking for something specific, the [API Reference](ApiReference.md) has every function documented directly, without the surrounding narrative.
+If you're new to GMLiteSearch, start at Chapter 1 and work through in order, the series is built to be read that way, with each chapter assuming you have the concepts from everything before it. If you're looking for something specific, the [API Reference](https://github.com/erkan612/GMLiteSearch/blob/main/RawDocumentation.md) has every function documented directly, without the surrounding narrative.
 
 Good luck, and happy building.
