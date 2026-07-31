@@ -34,10 +34,10 @@ GMLiteSearch is a complete search solution for GameMaker, designed for small to 
 - **Distance calculation** – Haversine for real world, Euclidean for game space
 
 ### Learning-to-Rank (LTR)
-- **Trainable relevance** – Model learns from user clicks
+- **Three trainable ranking models** – Linear regression, pairwise RankNet, and gradient-boosted LambdaMART, selectable and comparable side-by-side
 - **7 built-in features** – BM25, term frequency, title match, freshness, popularity, etc.
-- **Custom features** – Register your own feature extractors
-- **Model persistence** – Save/load trained models
+- **Custom features** – Register your own feature extractors, learned alongside the built-ins
+- **Model persistence** – Save/load trained models, including full LambdaMART tree ensembles
 
 ### Query Understanding
 - **Spell checking** – Automatic correction of typos
@@ -108,7 +108,7 @@ GMLiteSearch is a complete search solution for GameMaker, designed for small to 
 | No relevance scoring | BM25/TF-IDF scoring |
 | No filtering | Faceted search with aggregations |
 | No location support | Geospatial queries (real-world + game coords) |
-| Fixed ranking | Learning-to-Rank from user clicks |
+| Fixed ranking | Trainable ranking, linear, RankNet, or LambdaMART |
 | No typo tolerance | Fuzzy and n-gram search |
 | Manual snippet generation | Automatic context-aware snippets |
 
@@ -122,7 +122,7 @@ GMLiteSearch is a complete search solution for GameMaker, designed for small to 
 | Relevance scoring | ✅ | ❌ | ❌ |
 | Faceted filters | ✅ | ❌ | ❌ |
 | Geospatial | ✅ | ❌ | ❌ |
-| Learning-to-Rank | ✅ | ❌ | ❌ |
+| Learning-to-Rank (linear / RankNet / LambdaMART) | ✅ | ❌ | ❌ |
 | Spell checking | ✅ | ❌ | ❌ |
 | Auto-complete | ✅ | ❌ | ❌ |
 | Fuzzy matching | ✅ | ❌ | ❌ |
@@ -139,7 +139,6 @@ GMLiteSearch is a complete search solution for GameMaker, designed for small to 
 ---
 
 ## References
----
 
 **Relevance scoring (BM25 & TF-IDF)**
 Spärck Jones, K. (1972) "[A statistical interpretation of term specificity and its application in retrieval](https://www.emerald.com/jd/article/28/1/11/218980)", Journal of Documentation, 28(1), 11–21
