@@ -78,7 +78,7 @@ Iteration 99 - Pairwise loss: 0.0422
 RankNet training complete
 ```
 
-Notice the loss here is called **"pairwise loss"**, not the plain "loss" from Chapter 8, a small naming difference reflecting a genuinely different underlying quantity being minimized (cross-entropy over pair correctness, rather than squared error over absolute predictions). Both decrease smoothly with training, but they're measuring fundamentally different things.
+Notice the loss here is called **"pairwise loss,"** not the plain "loss" from Chapter 8, a small naming difference reflecting a genuinely different underlying quantity being minimized. Chapter 8's loss was **squared error**: literally `(true_value - predicted_value)²`, penalizing the raw numeric gap between prediction and reality. RankNet's pairwise loss instead uses something called **cross-entropy**, a way of measuring loss that's specifically built for probabilities rather than raw numbers, recall that the sigmoid output we just covered *is* a probability (how confident the model is that the ordering is correct). Cross-entropy penalizes a confidently *wrong* probability far more harshly than a mildly wrong one, if the model was 95% sure of the wrong order, that's penalized much more severely than if it was only 55% sure. You don't need the underlying formula to work with RankNet effectively, but it's worth knowing the two losses aren't just named differently, they're built for genuinely different kinds of predictions (raw numbers vs. probabilities), which is exactly why Chapter 8's linear model and this chapter's RankNet needed different training math in the first place, not just a different label on the same math.
 
 ### Evaluating a RankNet model
 
