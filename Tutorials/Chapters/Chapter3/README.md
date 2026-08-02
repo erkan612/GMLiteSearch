@@ -177,15 +177,17 @@ Hybrid search is a genuinely solid default choice for a general-purpose search b
 
 ## N-gram search: a different kind of forgiveness
 
-There's one more search mode worth understanding, and it takes a meaningfully different approach from everything else in this chapter. `gmls_search_ngrams` doesn't work at the word level at all, it works at the **character level**, using fixed-length chunks called **n-grams** (specifically, 3-character chunks by default, called **trigrams**, controlled by `ngram_size` which defaults to 3).
+There's one more search mode worth understanding, and it takes a meaningfully different approach from everything else in this chapter.
 
-A quick terminology note, since this can genuinely trip people up: this is a *different* concept from "n-gram" in the sense some people use when talking about sequences of *words* (like "bigram phrases"). Here, we're talking about chunks of *characters* within a single word, not sequences of multiple words.
+First, a general definition, since the term shows up in a lot of places beyond just GMLiteSearch, and it's worth actually knowing rather than just recognizing: an **n-gram** is simply a contiguous chunk of N items sliced out of a longer sequence. That's the whole concept, "n" is just a placeholder for whatever chunk size you're using. If you slice a sentence into chunks of 2 *words* at a time, those are word-bigrams (this is what people usually mean when they talk about "n-grams" in the context of language models or autocomplete). If you slice a single *word* into chunks of 2 *characters* at a time, which is exactly what Chapter 3's fuzzy search bigrams did, back a few sections ago, those are character-bigrams. The "n" and the "what you're chunking" are two independent choices, and mixing them up is one of the most common sources of confusion around this term.
 
-Here's how the extraction works: GMLiteSearch strips out anything that isn't a letter or digit, then slides a 3-character window across what's left, one character at a time:
+`gmls_search_ngrams` uses **character trigrams** specifically, chunks of 3 *characters* at a time, sliced from individual *words* (not sentences), which is a genuinely different unit than the character-bigrams fuzzy search used in the previous section. The chunk size is controlled by `ngram_size`, which defaults to 3, you could reconfigure it, though 3 is a well-established, sensible default for this kind of typo-tolerant matching.
+
+Here's how the extraction actually works: GMLiteSearch strips out anything that isn't a letter or digit, then slides a 3-character window across what's left, one character at a time, capturing each 3-character slice as it goes:
 
 ![How n-gram search breaks a word into trigrams](chapter3_trigram_window.svg)
 
-"Dagger" produces four trigrams: "dag," "agg," "gge," "ger." Every document containing any of these trigrams anywhere in its indexed n-gram table becomes a candidate, and results are ranked by how many trigrams overlap, not by a normalized similarity ratio like fuzzy search uses, but by raw overlap count.
+"Dagger" produces four trigrams: "dag," "agg," "gge," "ger", each one a 3-character window, shifted one letter to the right from the last. Every document containing any of these trigrams anywhere in its indexed n-gram table becomes a candidate, and results are ranked by how many trigrams overlap, not by a normalized similarity ratio like fuzzy search uses, but by raw overlap count.
 
 ### N-gram search's real strength: severe, scattered typos
 
@@ -227,11 +229,23 @@ This lets you adjust some foundational search behaviors:
 - `case_sensitive` (bool), whether "Fire" and "fire" are treated as the same word (usually you want `false`)
 - `enable_stemming` (bool), whether GMLiteSearch reduces words to a common root form (so "resisting" and "resistance" might both reduce toward "resist", a whole topic we're deliberately not diving into deeply in this chapter, since it deserves its own careful treatment later)
 - `min_word_length` (int), words shorter than this are ignored entirely during indexing; this is why very short words sometimes behave unexpectedly in search
-- `scoring` (string), either `"bm25"` (the default, and what we've been using since Chapter 1) or `"tfidf"`, an older, simpler relevance algorithm
+- `scoring` (string), either `"bm25"` (the default, and what we've been using since Chapter 1) or `"tfidf"`, an older, simpler relevance algorithm, worth actually understanding rather than just naming, since it's the direct ancestor of BM25 and reuses ideas you already have
 
 ```gml
 gmls_set_config(false, true, 2, "bm25");
 ```
+
+### A closer look at TF-IDF, since we just named it
+
+Back in Chapter 1, when BM25 first came up, two ideas did real work under the hood without being named explicitly: how *often* a word appears in a document, and how *rare* that word is across your whole collection (a word every single item mentions is a weak signal; a word only a handful of items mention is a strong one). TF-IDF is literally those two ideas, multiplied together, with nothing else added:
+
+```
+TF-IDF score = term_frequency × inverse_document_frequency
+```
+
+**Term frequency (TF)** is exactly what it sounds like, how many times the search term appears in this particular document. **Inverse document frequency (IDF)** captures rarity: it's calculated so that a term appearing in only a few documents gets a *high* IDF (rare, therefore meaningful), while a term appearing in nearly every document gets a *low* IDF, approaching zero (common, therefore not very useful for telling documents apart). Multiplying the two together means a document scores well specifically when it uses a *rare* term *often*, exactly the intuition you'd want.
+
+BM25, the algorithm we've used since Chapter 1, is best understood as TF-IDF's more refined descendant: it keeps the same core TF × IDF intuition, but adds two real improvements TF-IDF doesn't have, it stops rewarding a term indefinitely the more times it repeats (ten mentions of "fire" isn't meaningfully more relevant than five), and it accounts for document length (a term appearing twice in a short description is a stronger signal than the same term appearing twice in a five-paragraph one). This is why the default is `"bm25"`, and why you'd typically only reach for `"tfidf"` deliberately, perhaps for a simpler, more predictable scoring behavior, or to match an expectation from another system you're already familiar with, rather than because it usually outperforms the default.
 
 ### `gmls_set_bm25_params`
 
