@@ -33,14 +33,15 @@ function gmls_init_query_understanding() {
     }
 }
 
-function gmls_log_query(_query, _result_count, _selected_index = -1) {
+function gmls_log_query(_query, _result_count, _selected_index = -1, _duration = -1) {
     var _ls = global.gmls;
     
     var _log_entry = {
         query: _query,
         timestamp: current_time,
         result_count: _result_count,
-        selected_index: _selected_index
+        selected_index: _selected_index,
+        duration: _duration
     };
     
     ds_list_add(_ls.query_log, _log_entry);

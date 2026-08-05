@@ -28,7 +28,7 @@
 *   						  ╚██████╔╝██║ ╚═╝ ██║███████╗███████║		                     *
 *   						   ╚═════╝ ╚═╝     ╚═╝╚══════╝╚══════╝		                     *
 *   						Lightweight Search Engine for GameMaker	                         *
-*   						            Version 1.3.25										 *
+*   						            Version 1.4.33										 *
 *   																                         *
 *   						            by erkan612					                         *
 *   						***************************************                          *
@@ -70,7 +70,6 @@ function gmls_init() {
 		debug: {
 	        enabled: true,
 	        log_level: "info",
-	        query_history: [],
 	        slow_query_threshold: 100,
 	    },
 		
@@ -455,4 +454,20 @@ function gmls_load_from_string(_json) {
     }
     
     return true;
+}
+
+function _gmls_should_log(_level) {
+    var _ls = global.gmls;
+    if (!_ls.debug.enabled) return false;
+    
+    var _levels = ["error", "warn", "info", "debug"];
+    var _current_idx = -1;
+    var _requested_idx = -1;
+    for (var i = 0; i < array_length(_levels); i++) {
+        if (_levels[i] == _ls.debug.log_level) _current_idx = i;
+        if (_levels[i] == _level) _requested_idx = i;
+    }
+    
+    if (_current_idx == -1 || _requested_idx == -1) return false;
+    return _requested_idx <= _current_idx;
 }
