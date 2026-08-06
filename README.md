@@ -64,17 +64,6 @@ GMLiteSearch is a complete search solution for GameMaker, designed for small to 
 
 ---
 
-## Performance
-
-| Dataset Size | Memory Estimate | Recommended Settings |
-|--------------|-----------------|----------------------|
-| < 1,000 docs | 10-30 MB | All features enabled |
-| 1,000 - 10,000 | 30-100 MB | Disable n-grams |
-| 10,000 - 50,000 | 100-300 MB | Increase min word length, disable n-grams |
-| > 50,000 | 300+ MB | Use grid optimization, consider sharding |
-
----
-
 ## Use Cases
 
 ### RPG Games
@@ -128,6 +117,26 @@ GMLiteSearch is a complete search solution for GameMaker, designed for small to 
 | Fuzzy matching | ✅ | ❌ | ❌ |
 | Persistence | ✅ | ❌ | ❌ |
 | Pure GML | ✅ | ✅ | ✅ |
+
+---
+
+## Memory Performance
+ 
+Figures assume short, single-sentence documents with a handful of metadata tags, larger or more varied text will cost more per document.
+ 
+| Stemming | N-grams | Document Method | 500 docs | 1,000 docs | 5,000 docs | 10,000 docs | 25,000 docs | 50,000 docs | Bytes/doc |
+|---|---|---|---|---|---|---|---|---|---|
+| on | off | Weighted Document | 100.1 MB | 202.8 MB | 1,012.2 MB | 1.98 GB | 4.95 GB | 9.90 GB | ~212,600 |
+| off | off | Weighted Document | 4.6 MB | 9.0 MB | 44.8 MB | 89.6 MB | 222.3 MB | 448.2 MB | ~9,400 |
+| on | on | Weighted Document | 104.2 MB | 208.4 MB | 1.02 GB | 2.03 GB | 5.09 GB | 10.17 GB | ~218,500 |
+| on | off | Plain Document | 58.8 MB | 117.6 MB | 587.9 MB | 1.15 GB | 2.87 GB | 5.74 GB | ~123,300 |
+| off | on | Weighted Document | 8.75 MB | 17.5 MB | 87.5 MB | 175.0 MB | 437.5 MB | 875.0 MB | ~18,400 |
+| off | off | Plain Document | 1.97 MB | 3.9 MB | 19.7 MB | 39.4 MB | 98.5 MB | 197.0 MB | ~4,100 |
+| on | on | Plain Document | 61.1 MB | 122.2 MB | 610.8 MB | 1.19 GB | 2.98 GB | 5.96 GB | ~128,100 |
+| off | on | Plain Document | 4.24 MB | 8.5 MB | 42.4 MB | 84.8 MB | 212.0 MB | 424.0 MB | ~8,900 |
+ 
+- **Cheapest overall** – stemming off, n-grams off, Plain Document
+- **Note** – savings don't simply add up; stemming off + Plain Document together saves more than either alone would suggest
 
 ---
 
