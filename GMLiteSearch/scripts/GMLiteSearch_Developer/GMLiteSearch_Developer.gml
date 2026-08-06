@@ -507,7 +507,7 @@ function gmls_benchmark(_iterations = 100) {
         array_push(_benchmark.recommendations, "  N-gram search is enabled and may slow down queries. Disable if not needed.");
     }
     if (_ls.doc_count > 10000 && !_ls.enable_stemming) {
-        array_push(_benchmark.recommendations, "  Enable stemming to reduce index size and improve speed.");
+        array_push(_benchmark.recommendations, "  Consider disabling stemming (enable_stemming = false) to significantly reduce index size and memory use, it's the single largest memory cost in this framework.");
     }
     
     show_debug_message("\nBENCHMARK SUMMARY:");
@@ -1009,4 +1009,19 @@ function gmls_explain_ltr_score(_query, _doc_id, _verbose = true) {
     }
     
     return _explanation;
+}
+
+function _gmls_debug_log(_log, _header_caps) {
+	var _char = "-";
+	var _header_length = string_length(_header_caps);
+	var _required_length = 50;
+	var _available_length = _required_length - 4 - _header_length - string_length(" DEBUG ");
+	var _str_top = string_repeat(_char, 3) + " " + _header_caps + " DEBUG " + string_repeat(_char, max(_available_length, 0));
+	var _str_bottom = string_repeat(_char, string_length(_str_top));
+    show_debug_message("");
+	show_debug_message(_str_top);
+    for (var i = 0; i < array_length(_log); i++) {
+        show_debug_message("  " + _log[i]);
+    }
+    show_debug_message(_str_bottom);
 }

@@ -457,7 +457,7 @@ function _gmls_apply_facet_filters(_doc_ids_array) {
     var _date_doc_sets = [];
     for (var di = 0; di < array_length(_date_filter_keys); di++) {
         var _filter_key = _date_filter_keys[di];
-        var _facet_name = string_copy(_filter_key, 0, 5); // date|
+        var _facet_name = string_copy(_filter_key, 6, string_length(_filter_key) - 5); // date|
         var _filter_values = ds_map_find_value(_ls.active_filters, _filter_key);
         var _pass_set = ds_map_create();
         

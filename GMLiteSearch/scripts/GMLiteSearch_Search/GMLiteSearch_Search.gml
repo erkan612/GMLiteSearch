@@ -218,6 +218,242 @@ function gmls_search_hybrid(_query, _max_results = -1) {
     return _results;
 }
 
+function gmls_smart_search(_query, _options = undefined) {
+    /*
+    _options = {
+        enable_text: true,
+        enable_location: true,
+        enable_facets: true,
+        enable_dates: true,
+        enable_ltr: true,
+
+        location_mode: "latlng",
+        lat: 0, lng: 0,           // required if location_mode == "latlng"
+        x: 0, y: 0, z: 0,         // required if location_mode == "2d" or "3d"
+        radius: 10,
+        unit: "km",               // only meaningful for "latlng"
+
+        max_results: -1,
+        debug: false,
+        custom_filter: undefined
+    };
+    */
+
+    var _ls = global.gmls;
+
+    var _defaults = {
+        enable_text: true,
+        enable_location: true,
+        enable_facets: true,
+        enable_dates: true,
+        enable_ltr: true,
+
+        location_mode: "latlng",
+        lat: 0, lng: 0,
+        x: 0, y: 0, z: 0,
+        radius: 10,
+        unit: "km",
+
+        max_results: -1,
+        debug: false,
+        custom_filter: undefined
+    };
+
+    var _caller_gave_latlng = !is_undefined(_options) && (variable_struct_exists(_options, "lat") || variable_struct_exists(_options, "lng"));
+    var _caller_gave_xy     = !is_undefined(_options) && (variable_struct_exists(_options, "x")   || variable_struct_exists(_options, "y"));
+    var _caller_gave_z      = !is_undefined(_options) && variable_struct_exists(_options, "z");
+
+    if (is_undefined(_options)) _options = {};
+    _options = _gmls_merge_options(_options, _defaults);
+
+    var _start_time = current_time;
+    var _log = [];
+
+    if (_options.enable_location) {
+        var _missing_coords = false;
+        if (_options.location_mode == "latlng" && !_caller_gave_latlng) {
+            _missing_coords = true;
+        } else if (_options.location_mode == "2d" && !_caller_gave_xy) {
+            _missing_coords = true;
+        } else if (_options.location_mode == "3d" && !(_caller_gave_xy && _caller_gave_z)) {
+            _missing_coords = true;
+        }
+        if (_missing_coords) {
+            array_push(_log, "WARNING: Location search enabled but no coordinates provided for mode '" + _options.location_mode + "'. Geospatial search is disabled for this call.");
+            _options.enable_location = false;
+        }
+    }
+
+    // Candidate documents
+    var _candidate_ids = [];
+    var _candidate_map = ds_map_create();  // doc_id -> { text_score, location_data }
+
+    // Text search
+    if (_options.enable_text && string_length(_query) > 0) {
+        var _text_results = gmls_search(_query, -1);
+        for (var i = 0; i < array_length(_text_results); i++) {
+            var _id = _text_results[i].id;
+            if (!ds_map_exists(_candidate_map, _id)) {
+                ds_map_add(_candidate_map, _id, { text_score: 0, location_data: undefined });
+                array_push(_candidate_ids, _id);
+            }
+            var _entry = ds_map_find_value(_candidate_map, _id);
+            _entry.text_score = _text_results[i].score;
+        }
+        array_push(_log, "Text search: " + string(array_length(_text_results)) + " results");
+    }
+
+    // Location search
+    if (_options.enable_location) {
+        var _location_results = [];
+        var _mode = _options.location_mode;
+
+        if (_mode == "latlng") {
+            _location_results = gmls_search_nearby(_options.lat, _options.lng, _options.radius, _options.unit, "", -1);
+        } else if (_mode == "2d") {
+            _location_results = gmls_search_nearby_2d(_options.x, _options.y, _options.radius, "", -1);
+        } else if (_mode == "3d") {
+            _location_results = gmls_search_nearby_3d(_options.x, _options.y, _options.z, _options.radius, "", -1);
+        }
+
+        for (var i = 0; i < array_length(_location_results); i++) {
+            var _id = _location_results[i].id;
+            if (!ds_map_exists(_candidate_map, _id)) {
+                ds_map_add(_candidate_map, _id, { text_score: 0, location_data: undefined });
+                array_push(_candidate_ids, _id);
+            }
+            var _entry = ds_map_find_value(_candidate_map, _id);
+            _entry.location_data = { distance: _location_results[i].distance };
+        }
+        array_push(_log, "Location search (" + _mode + "): " + string(array_length(_location_results)) + " results within " + string(_options.radius) + ((_mode == "latlng") ? _options.unit : " units"));
+    }
+
+    if (array_length(_candidate_ids) == 0) {
+        array_push(_log, "No candidates found");
+        if (_options.debug) _gmls_debug_log(_log, "SMART SEARCH");
+        ds_map_destroy(_candidate_map);
+        return {
+            results: [], total: 0, candidates: 0, filtered: 0,
+            duration_ms: current_time - _start_time, log: _log,
+            features_enabled: {
+                text: _options.enable_text,
+                location: _options.enable_location,
+                facets: _options.enable_facets,
+                dates: _options.enable_dates,
+                ltr: _options.enable_ltr
+            }
+        };
+    }
+
+    array_push(_log, "Total candidates before filtering: " + string(array_length(_candidate_ids)));
+
+    // Facet + date filters
+    var _filtered_ids = _candidate_ids;
+    if (_options.enable_facets || _options.enable_dates) {
+        _filtered_ids = _gmls_apply_facet_filters(_candidate_ids);
+        array_push(_log, "After facet/date filtering: " + string(array_length(_filtered_ids)) + " results");
+    }
+
+    // Custom filter
+    if (!is_undefined(_options.custom_filter)) {
+        var _custom_filtered = [];
+        for (var i = 0; i < array_length(_filtered_ids); i++) {
+            var _id = _filtered_ids[i];
+            try {
+                if (_options.custom_filter(_id)) {
+                    array_push(_custom_filtered, _id);
+                }
+            } catch (_err) {
+                show_debug_message("Custom filter error on " + string(_id) + ": " + string(_err));
+            }
+        }
+        _filtered_ids = _custom_filtered;
+        array_push(_log, "After custom filter: " + string(array_length(_filtered_ids)) + " results");
+    }
+
+    // Build results
+    var _results = [];
+    var _has_ltr = _options.enable_ltr && _ls.ltr_enabled;
+
+    for (var i = 0; i < array_length(_filtered_ids); i++) {
+        var _id = _filtered_ids[i];
+        var _doc = ds_map_find_value(_ls.documents, _id);
+        var _entry = ds_map_find_value(_candidate_map, _id);
+
+        if (is_undefined(_doc)) continue;
+
+        var _result = {
+            id: _id,
+            document: _doc,
+            text_score: _entry.text_score,
+            location_data: _entry.location_data,
+            snippet: ""
+        };
+
+        var _score = 0;
+        var _weight_total = 0;
+
+        if (_options.enable_text && _entry.text_score > 0) {
+            var _text_norm = _entry.text_score / (1.0 + _entry.text_score);
+            _score += _text_norm;
+            _weight_total += 1.0;
+        }
+
+        if (_options.enable_location && !is_undefined(_entry.location_data)) {
+            var _dist_score = 1.0 / (1.0 + _entry.location_data.distance / _options.radius);
+            _score += _dist_score;
+            _weight_total += 1.0;
+        }
+
+        if (_weight_total > 0) _score = _score / _weight_total;
+
+        if (_has_ltr) {
+            var _features = _gmls_extract_features(_id, _query, { id: _id, score: _entry.text_score });
+            _result.ltr_score = _gmls_rank_score(_features);
+            _result.features = _features;
+            _score = _result.ltr_score;
+        }
+
+        _result.score = _score;
+
+        if (string_length(_query) > 0) {
+            _result.snippet = gmls_generate_advanced_snippet(_id, _query, { default_length: 150 });
+        } else {
+            _result.snippet = string_copy(_doc.text, 1, 150) + "...";
+        }
+
+        array_push(_results, _result);
+    }
+
+    array_sort(_results, function(a, b) { return sign(b.score - a.score); });
+    if (_options.max_results > 0 && array_length(_results) > _options.max_results) {
+        array_resize(_results, _options.max_results);
+    }
+
+    var _duration = current_time - _start_time;
+    array_push(_log, "Total results: " + string(array_length(_results)));
+    array_push(_log, "Search took: " + string(_duration) + "ms");
+    if (_options.debug) _gmls_debug_log(_log, "SMART SEARCH");
+
+    ds_map_destroy(_candidate_map);
+
+    return {
+        results: _results,
+        total: array_length(_results),
+        candidates: array_length(_candidate_ids),
+        filtered: array_length(_filtered_ids),
+        duration_ms: _duration,
+        log: _log,
+        features_enabled: {
+            text: _options.enable_text,
+            location: _options.enable_location,
+            facets: _options.enable_facets,
+            dates: _options.enable_dates,
+            ltr: _options.enable_ltr
+        }
+    };
+}
+
 function gmls_search_ngrams(_query, _max_results = -1) {
     var _ls = global.gmls;
     if (!_ls.enable_ngrams) return gmls_search(_query, _max_results);
@@ -694,7 +930,7 @@ function gmls_search_nearby_2d(_x, _y, _radius, _query = "", _max_results = -1) 
     var _doc_id = ds_map_find_first(_ls.geo_index);
     while (!is_undefined(_doc_id)) {
         var _loc = ds_map_find_value(_ls.geo_index, _doc_id);
-        if (_loc.type == "2d" || _loc.type == "grid") {
+        if (variable_struct_exists(_loc, "x") && variable_struct_exists(_loc, "y")) {
             array_push(_candidates, _doc_id);
         }
         _doc_id = ds_map_find_next(_ls.geo_index, _doc_id);
@@ -759,7 +995,7 @@ function gmls_search_nearby_3d(_x, _y, _z, _radius, _query = "", _max_results = 
     var _doc_id = ds_map_find_first(_ls.geo_index);
     while (!is_undefined(_doc_id)) {
         var _loc = ds_map_find_value(_ls.geo_index, _doc_id);
-        if (_loc.type == "3d") {
+        if (variable_struct_exists(_loc, "x") && variable_struct_exists(_loc, "y") && variable_struct_exists(_loc, "z")) {
             array_push(_candidates, _doc_id);
         }
         _doc_id = ds_map_find_next(_ls.geo_index, _doc_id);

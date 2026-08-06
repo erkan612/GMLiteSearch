@@ -28,7 +28,7 @@
 *   						  ╚██████╔╝██║ ╚═╝ ██║███████╗███████║		                     *
 *   						   ╚═════╝ ╚═╝     ╚═╝╚══════╝╚══════╝		                     *
 *   						Lightweight Search Engine for GameMaker	                         *
-*   						            Version 1.4.42										 *
+*   						            Version 1.5.57										 *
 *   																                         *
 *   						            by erkan612					                         *
 *   						***************************************                          *
@@ -50,7 +50,7 @@ function gmls_init() {
 	    
 	    // Configuration
 	    case_sensitive			: false,
-	    enable_stemming			: true,
+	    enable_stemming			: false,
 	    min_word_length			: 2,
 	    stop_words				: ds_list_create(),
 								

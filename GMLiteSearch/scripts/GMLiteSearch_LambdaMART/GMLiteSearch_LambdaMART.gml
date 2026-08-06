@@ -223,6 +223,7 @@ function _gmls_dcg(_relevances, _k = -1) {
 
 function _gmls_ideal_dcg(_relevances, _k = -1) {
     var _sorted = variable_clone(_relevances);
+    array_sort(_sorted, false);
     return _gmls_dcg(_sorted, _k);
 }
 
