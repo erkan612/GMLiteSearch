@@ -580,7 +580,8 @@ function gmls_analyze_query(_query) {
     var _stop_words_removed = [];
     var _raw_words = string_split(_query, " ");
     for (var i = 0; i < array_length(_raw_words); i++) {
-        if (_gmls_is_stop_word(_raw_words[i])) {
+        var _norm_word = _gmls_normalize_word(_raw_words[i]);
+        if (_gmls_is_stop_word(_norm_word)) {
             array_push(_stop_words_removed, _raw_words[i]);
         }
     }

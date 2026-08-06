@@ -46,71 +46,71 @@ function _gmls_replace_suffix(str, old_suffix, new_suffix) {
 
 function _gmls_handle_irregulars(word) {
     // irregular plural forms
-    var irregulars = ds_map_create();
-    ds_map_add(irregulars, "mice", "mouse");
-    ds_map_add(irregulars, "lice", "louse");
-    ds_map_add(irregulars, "geese", "goose");
-    ds_map_add(irregulars, "teeth", "tooth");
-    ds_map_add(irregulars, "feet", "foot");
-    ds_map_add(irregulars, "children", "child");
-    ds_map_add(irregulars, "oxen", "ox");
-    ds_map_add(irregulars, "indices", "index");
-    ds_map_add(irregulars, "appendices", "appendix");
-    ds_map_add(irregulars, "criteria", "criterion");
-    ds_map_add(irregulars, "phenomena", "phenomenon");
-    ds_map_add(irregulars, "data", "datum");
-    ds_map_add(irregulars, "media", "medium");
-    ds_map_add(irregulars, "analyses", "analysis");
-    ds_map_add(irregulars, "diagnoses", "diagnosis");
-    ds_map_add(irregulars, "theses", "thesis");
-    ds_map_add(irregulars, "men", "man");
-    ds_map_add(irregulars, "women", "woman");
-    ds_map_add(irregulars, "people", "person");
-    
-    // past tense
-    ds_map_add(irregulars, "ran", "run");
-    ds_map_add(irregulars, "went", "go");
-    ds_map_add(irregulars, "saw", "see");
-    ds_map_add(irregulars, "ate", "eat");
-    ds_map_add(irregulars, "gave", "give");
-    ds_map_add(irregulars, "took", "take");
-    ds_map_add(irregulars, "came", "come");
-    ds_map_add(irregulars, "became", "become");
-    ds_map_add(irregulars, "began", "begin");
-    ds_map_add(irregulars, "drank", "drink");
-    ds_map_add(irregulars, "sang", "sing");
-    ds_map_add(irregulars, "rang", "ring");
-    ds_map_add(irregulars, "swam", "swim");
-    ds_map_add(irregulars, "froze", "freeze");
-    ds_map_add(irregulars, "spoke", "speak");
-    ds_map_add(irregulars, "broke", "break");
-    ds_map_add(irregulars, "chose", "choose");
-    ds_map_add(irregulars, "drove", "drive");
-    ds_map_add(irregulars, "wrote", "write");
-    ds_map_add(irregulars, "rose", "rise");
-    ds_map_add(irregulars, "shook", "shake");
-    ds_map_add(irregulars, "tore", "tear");
-    ds_map_add(irregulars, "wore", "wear");
-    ds_map_add(irregulars, "bore", "bear");
-    ds_map_add(irregulars, "stole", "steal");
-    ds_map_add(irregulars, "got", "get");
-    ds_map_add(irregulars, "forgot", "forget");
-    ds_map_add(irregulars, "shot", "shoot");
-    ds_map_add(irregulars, "lit", "light");
-    ds_map_add(irregulars, "bled", "bleed");
-    ds_map_add(irregulars, "fed", "feed");
-    ds_map_add(irregulars, "met", "meet");
-    ds_map_add(irregulars, "led", "lead");
-    ds_map_add(irregulars, "read", "read");
-    ds_map_add(irregulars, "sped", "speed");
-    
+    static irregulars = undefined;
+    if (is_undefined(irregulars)) {
+        irregulars = ds_map_create();
+        ds_map_add(irregulars, "mice", "mouse");
+        ds_map_add(irregulars, "lice", "louse");
+        ds_map_add(irregulars, "geese", "goose");
+        ds_map_add(irregulars, "teeth", "tooth");
+        ds_map_add(irregulars, "feet", "foot");
+        ds_map_add(irregulars, "children", "child");
+        ds_map_add(irregulars, "oxen", "ox");
+        ds_map_add(irregulars, "indices", "index");
+        ds_map_add(irregulars, "appendices", "appendix");
+        ds_map_add(irregulars, "criteria", "criterion");
+        ds_map_add(irregulars, "phenomena", "phenomenon");
+        ds_map_add(irregulars, "data", "datum");
+        ds_map_add(irregulars, "media", "medium");
+        ds_map_add(irregulars, "analyses", "analysis");
+        ds_map_add(irregulars, "diagnoses", "diagnosis");
+        ds_map_add(irregulars, "theses", "thesis");
+        ds_map_add(irregulars, "men", "man");
+        ds_map_add(irregulars, "women", "woman");
+        ds_map_add(irregulars, "people", "person");
+
+        // past tense
+        ds_map_add(irregulars, "ran", "run");
+        ds_map_add(irregulars, "went", "go");
+        ds_map_add(irregulars, "saw", "see");
+        ds_map_add(irregulars, "ate", "eat");
+        ds_map_add(irregulars, "gave", "give");
+        ds_map_add(irregulars, "took", "take");
+        ds_map_add(irregulars, "came", "come");
+        ds_map_add(irregulars, "became", "become");
+        ds_map_add(irregulars, "began", "begin");
+        ds_map_add(irregulars, "drank", "drink");
+        ds_map_add(irregulars, "sang", "sing");
+        ds_map_add(irregulars, "rang", "ring");
+        ds_map_add(irregulars, "swam", "swim");
+        ds_map_add(irregulars, "froze", "freeze");
+        ds_map_add(irregulars, "spoke", "speak");
+        ds_map_add(irregulars, "broke", "break");
+        ds_map_add(irregulars, "chose", "choose");
+        ds_map_add(irregulars, "drove", "drive");
+        ds_map_add(irregulars, "wrote", "write");
+        ds_map_add(irregulars, "rose", "rise");
+        ds_map_add(irregulars, "shook", "shake");
+        ds_map_add(irregulars, "tore", "tear");
+        ds_map_add(irregulars, "wore", "wear");
+        ds_map_add(irregulars, "bore", "bear");
+        ds_map_add(irregulars, "stole", "steal");
+        ds_map_add(irregulars, "got", "get");
+        ds_map_add(irregulars, "forgot", "forget");
+        ds_map_add(irregulars, "shot", "shoot");
+        ds_map_add(irregulars, "lit", "light");
+        ds_map_add(irregulars, "bled", "bleed");
+        ds_map_add(irregulars, "fed", "feed");
+        ds_map_add(irregulars, "met", "meet");
+        ds_map_add(irregulars, "led", "lead");
+        ds_map_add(irregulars, "read", "read");
+        ds_map_add(irregulars, "sped", "speed");
+    }
+
     var lower = string_lower(word);
     if (ds_map_exists(irregulars, lower)) {
-        var result = ds_map_find_value(irregulars, lower);
-        ds_map_destroy(irregulars);
-        return result;
+        return ds_map_find_value(irregulars, lower);
     }
-    ds_map_destroy(irregulars);
     return word;
 }
 

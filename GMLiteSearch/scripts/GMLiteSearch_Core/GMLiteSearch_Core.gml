@@ -1,7 +1,7 @@
 /*********************************************************************************************
 *                                        MIT License                                         *
 *--------------------------------------------------------------------------------------------*
-* Copyright (c) 2025 erkan612                                                                *
+* Copyright (c) 2026 erkan612                                                                *
 *                                                                                            *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this       *
 * software and associated documentation files (the "Software"), to deal in the Software      *
@@ -28,7 +28,7 @@
 *   						  ╚██████╔╝██║ ╚═╝ ██║███████╗███████║		                     *
 *   						   ╚═════╝ ╚═╝     ╚═╝╚══════╝╚══════╝		                     *
 *   						Lightweight Search Engine for GameMaker	                         *
-*   						            Version 1.4.33										 *
+*   						            Version 1.4.42										 *
 *   																                         *
 *   						            by erkan612					                         *
 *   						***************************************                          *
@@ -137,10 +137,16 @@ function gmls_cleanup() {
     ds_map_destroy(_ls.inverted_index);
     ds_map_destroy(_ls.documents);
     ds_map_destroy(_ls.word_stats);
+    
+    var _ngram = ds_map_find_first(_ls.ngram_index);
+    while (!is_undefined(_ngram)) {
+        ds_map_destroy(ds_map_find_value(_ls.ngram_index, _ngram));
+        _ngram = ds_map_find_next(_ls.ngram_index, _ngram);
+    }
     ds_map_destroy(_ls.ngram_index);
     ds_map_destroy(_ls.cache_idf);
     ds_list_destroy(_ls.stop_words);
-    
+	
     // Facets
     if (variable_struct_exists(_ls, "facet_index")) ds_map_destroy(_ls.facet_index);
     if (variable_struct_exists(_ls, "facet_cache")) ds_map_destroy(_ls.facet_cache);
@@ -197,9 +203,8 @@ function _gmls_normalize_word(_word) {
 
 function _gmls_is_stop_word(_word) {
     var _ls = global.gmls;
-    var _norm = _gmls_normalize_word(_word);
     for (var i = 0; i < ds_list_size(_ls.stop_words); i++) {
-        if (ds_list_find_value(_ls.stop_words, i) == _norm) return true;
+        if (ds_list_find_value(_ls.stop_words, i) == _word) return true;
     }
     return false;
 }
