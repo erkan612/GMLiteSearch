@@ -144,6 +144,7 @@ Figures assume short, single-sentence documents with a handful of metadata tags,
 
 - **[Getting Started](GettingStarted.md)** – First time setup and basic usage
 - **[Full Documentation](Documentation.md)** – Complete API reference and advanced topics
+- **[Tutorials](https://github.com/erkan612/GMLiteSearch/tree/main/Tutorials)** – Ten-chapter tutorials teaching GMLiteSearch from ground up to three-model machine-learning ranking system trained on your own data
 
 ---
 
