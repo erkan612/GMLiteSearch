@@ -152,14 +152,6 @@ LambdaMART: 25 trees, lr=0.15, initial_value=1.50
 LambdaMART training complete: 25 trees built
 ```
 
-### An honest, important lesson about this result
-
-I want to walk you through something worth knowing, because it happened to me directly while preparing this exact example, and it's a genuinely useful lesson about testing your own training pipelines honestly rather than trusting a good-looking number at face value.
-
-My very first attempt at building this training data produced an **"Initial avg NDCG: 1.0000"**, a seemingly perfect score, *before any training happened at all*. That should immediately raise suspicion, and it did: a model that hasn't learned anything yet should not already be perfect. Digging in, I found the cause: I had accidentally built my training examples already sorted by their correct relevance order, so when documents started out tied (before training gives them any real separation), a stable sort's tie-breaking rule happened to preserve that already-correct insertion order, producing a "perfect" result that reflected nothing about the model, only an artifact of how I'd built my test data. Once I shuffled the insertion order so ties couldn't accidentally resolve to the right answer, the honest number came back, NDCG starting at a genuinely unremarkable 0.7952, then climbing through real training to 0.8602.
-
-The lesson generalizes well beyond this one example: **whenever a machine learning result looks suspiciously perfect before any real learning has happened, don't celebrate, investigate.** It's far more likely you've accidentally built a trivial test than that you've stumbled onto something remarkable.
-
 ### An honest limitation, verified precisely
 
 Even the *honest* number above, 0.86 after training, up from 0.80, deserves a closer look rather than automatic satisfaction. Checking every individual query group's NDCG (not just the overall average) shows every single one still imperfect to some degree. This isn't a training failure, it's the direct, expected consequence of what we just learned about NDCG's discount curve. With only 4 competing documents per query, and NDCG weighting bottom-of-list errors so lightly, there's genuinely little mathematical pressure to perfect the last position or two, the gradient for correcting a rank-3-vs-rank-4 swap is real but small, exactly as the discount curve predicted. This matches, precisely, a pattern we've now seen twice in this series: **LambdaMART reliably nails the top of a ranking, and is honestly, structurally less aggressive about polishing the bottom**, a property of the algorithm, not a defect in any particular implementation.
