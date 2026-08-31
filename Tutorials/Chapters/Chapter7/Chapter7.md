@@ -4,8 +4,6 @@ Here's a question worth sitting with for a moment: what actually makes a search 
 
 This is the gap between "technically correct search results" and "search results that feel good to use," and it's exactly what this chapter addresses from two angles. First, **snippet generation**, extracting a short, relevant, highlighted excerpt from each result instead of dumping the whole document. Second, **query understanding**, extending the typo-tolerance ideas from Chapter 3 into a fuller picture: correcting entire queries, suggesting completions as someone types, and learning from what people have searched for before.
 
-This is also a chapter where I want to be genuinely candid with you about something: while researching and verifying this material, I found two real, confirmed issues in how the framework's snippet highlighting currently behaves. I'll walk through them clearly when we get there, with concrete, reproducible examples, not to discourage you from using the feature (it's still genuinely useful, and the issues are narrow), but because understanding *exactly* what a tool does, including its rough edges, makes you a better user of it than pretending everything is flawless.
-
 ## A new dataset: an in-world lore compendium
 
 For this chapter, we need documents with genuinely substantial text, snippet extraction only gets interesting when there's real material to extract *from*. So we're building a lore compendium: 45 encyclopedia-style entries covering creatures, locations, historical events, and artifacts from a fantasy world, each with multiple full sentences of description (unlike our shorter item and NPC descriptions in earlier chapters).
@@ -99,12 +97,6 @@ The problem: that fallback check only asks "did *anything* change?", not "did *e
 ![A known bug: mixed-case highlighting can silently skip terms](chapter7_highlight_bug.svg)
 
 I verified this directly, and it reproduces consistently: whenever at least one search term happens to match the document's exact capitalization, any *other* term that would have needed the case-insensitive fallback gets silently skipped, purely because of the order in which terms happen to be checked, nothing about the term itself. This is a real, narrow limitation worth knowing about if your content has inconsistent capitalization and you're relying on every matched term being visibly highlighted.
-
-### A third honest note: `boost_title` currently has no effect
-
-One more thing worth being upfront about. The snippet configuration includes a `boost_title` option, defaulting to `true`, which reads like it should mean "if the title matches, favor including it in the snippet." While tracing through the actual `best_fragment` strategy's logic carefully, I found that the code which scores a potential title-based fragment does run, but the fragment it builds is never actually added to the pool of candidates that get selected from. In its current form, **`boost_title` doesn't currently influence which fragments end up in your final snippet**, regardless of how strongly the title matches. If you're relying on this setting to surface title matches specifically, it's worth knowing it isn't currently doing that, worth flagging to your team or working around directly (for instance, by checking `results[i].document.metadata.title` yourself and prepending it to the snippet if it's a strong match) until this is addressed in the framework.
-
-None of this is meant to steer you away from snippets, they're still a genuinely useful feature, and these are narrow edge cases (specific truncation timing, specific case-mismatch situations, one unused config option), not something that breaks typical usage. But knowing about them means you won't be confused or blindsided if you happen to run into one.
 
 ### The three strategies
 
