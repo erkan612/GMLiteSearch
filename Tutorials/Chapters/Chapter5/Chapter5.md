@@ -170,10 +170,6 @@ Running this against our dataset with a 6-month window on the most recent activi
 
 Here's something worth understanding precisely, because it's easy to assume the opposite: **the histogram's buckets start from the *earliest* matching date in your filtered set, and walk forward, not from "today" and walk backward.** If you ask for a 12-month histogram (`count = 12`) but your data only spans 6 real months, you'll get 12 buckets total, but the last several will simply be empty (zero releases, and per the point above, likely not shown at all), because the walk started at your oldest data point and kept going, not because it anchored itself to the present. If you specifically want "the last N months relative to today," you'll want to combine this with a date filter (like `"last_month"` repeated, or an explicit range) to first narrow your data to a relevant window before building the histogram, the histogram itself doesn't know or care what "today" is.
 
-### Weekly histograms and the start of the week
-
-One more detail worth being upfront about, in the interest of not overstating my own certainty: when using `"week"` as the interval, GMLiteSearch labels each bucket by the date of that week's **Monday**, every release within the same Monday-to-Sunday span gets grouped under that Monday's date. This is the framework's own stated intent, based on its internal logic. I'll be honest that I wasn't able to independently, fully confirm GameMaker's exact weekday-numbering behavior against official documentation while writing this chapter, if you're building something where the precise week-start boundary matters, it's worth a quick sanity check in your own project (add a document dated on a known Wednesday, run a weekly histogram, and confirm the bucket label lands on the Monday of that same week) before relying on it in production.
-
 ## What you've learned
 
 - **Dates are continuous, not categorical**, which is why they need dedicated filtering tools rather than being treated like an ordinary facet value.
