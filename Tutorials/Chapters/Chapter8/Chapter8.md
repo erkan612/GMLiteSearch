@@ -179,7 +179,7 @@ for (var i = 0; i < array_length(results); i++) {
 
 Each result now carries both `ltr_score` (the trained model's prediction) and `original_score` (plain BM25, for comparison), letting you directly see how the learned ranking differs from the fixed formula you'd get without any training at all.
 
-## Evaluating the model, and an honest limitation worth knowing
+## Evaluating the model
 
 It's not enough to just trust that training "worked", you want some measure of how accurate the trained model actually is. `gmls_evaluate_model` provides exactly this:
 
@@ -191,8 +191,6 @@ show_debug_message("RMSE: " + string(eval.rmse));
 ```
 
 This works by holding back a portion of your training examples (controlled by `test_ratio`, defaulting to `0.2`, meaning 20%) as a **test set**, data the evaluation checks predictions against, conceptually separate from what was used to fit the weights. It reports three related measures of error: **MSE** (mean squared error, the same quantity the training loss itself tracks), **MAE** (mean absolute error, often more intuitive, since it's in the same units as your relevance scores directly, without the squaring), and **RMSE** (root mean squared error, MSE's square root, which brings it back to relevance-score-like units too, while still penalizing large errors more than MAE does).
-
-Here's something worth knowing clearly before you rely on this function, because I traced through exactly how the test set gets selected, and it's not what you might assume: **the test set is simply the *last* N% of your training examples, in the order you added them, not a random sample.** This matters in a very concrete, practical way. Imagine you logged all your strongly-positive training examples first, then went back later and added a batch of negative (irrelevant) examples afterward, a genuinely plausible, ordinary workflow. Since the test set is just "whatever was added last," you could end up with a test set that's *entirely* negative examples, giving you an evaluation that says nothing meaningful about how well your model handles the full range of relevance it was actually trained on.
 
 ![The evaluation test set is the last examples in insertion order, not a random sample](chapter8_eval_split_issue.svg)
 
