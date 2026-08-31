@@ -84,20 +84,6 @@ This matters practically for two reasons. First, it's cosmetically a little roug
 
 Compare this to the `balanced` strategy (which we'll cover shortly), which selects whole sentences instead of fixed character windows, guaranteeing grammatically complete, never-mid-word fragments, at the cost of less precise control over exact snippet length.
 
-![Three different snippet generation strategies](chapter7_snippet_strategies.svg)
-
-### A second, more subtle issue: mixed-case highlighting can silently skip terms
-
-Here's the second thing worth knowing clearly, because it's genuinely non-obvious and I want to walk you through exactly how I confirmed it rather than just assert it.
-
-GMLiteSearch's highlighting works in two passes. First, it tries a direct, case-sensitive text replacement for each search term. If that succeeds for *any* term in the snippet, the highlighter considers its job essentially done. Only if the case-sensitive pass matched **nothing at all** does it fall back to a second, case-insensitive pass, designed to catch situations where the document's actual capitalization differs from the (typically lowercased) search term.
-
-The problem: that fallback check only asks "did *anything* change?", not "did *every* term get its chance?" Consider a simple, real example: searching for `"dragon wyrm"` against text that reads *"the dragon is also called a Wyrm in old texts."* The tokenized search terms are `["dragon", "wyrm"]` (lowercase, as GMLiteSearch's tokenizer produces). "dragon" appears lowercase in the text, so it matches immediately on the case-sensitive pass. But because *something* already matched, **the case-insensitive fallback never runs at all**, meaning "Wyrm" (capitalized in the text) never gets checked, and is silently left unhighlighted, even though it's a completely genuine match for the search term "wyrm."
-
-![A known bug: mixed-case highlighting can silently skip terms](chapter7_highlight_bug.svg)
-
-I verified this directly, and it reproduces consistently: whenever at least one search term happens to match the document's exact capitalization, any *other* term that would have needed the case-insensitive fallback gets silently skipped, purely because of the order in which terms happen to be checked, nothing about the term itself. This is a real, narrow limitation worth knowing about if your content has inconsistent capitalization and you're relying on every matched term being visibly highlighted.
-
 ### The three strategies
 
 Now that you understand the honest tradeoffs, let's look at what each strategy actually does, and when you'd reach for each one.
